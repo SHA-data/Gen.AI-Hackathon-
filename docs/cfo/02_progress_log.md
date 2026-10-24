@@ -159,6 +159,30 @@
   - Verified that cash floor breaches correctly return `ResultStatus.WARNING` with diagnostic text, satisfying both safety and user transparency requirements.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 7: Lineage & Evidence Resolution
+- **Timestamp:** 2026-10-24 12:53:00 UTC
+- **Built:**
+  - `LineageResolver` (`services/api/app/cfo/verification/lineage.py`):
+    - Reconstructs calculation formula: `closing_cash = opening_cash + projected_inflows - projected_outflows`.
+    - Returns contributing events (invoices, payroll lines) and traces them back to raw `source_rows` (with row numbers and raw payloads).
+    - Returns active finance assumptions for the tenant.
+  - Evidence Target Resolvers registered in `EvidenceRegistry` (`app/core/evidence.py`):
+    - Resolvers for `source_row`, `financial_record`, `forecast_run`, `forecast_point`, and `finance_assumption`.
+  - Core Claim Creation:
+    - Integration with `create_claim_with_evidence` ensuring computed claims link 1:1 to their underlying targets in `evidence_links`.
+  - HTTP Lineage Endpoint:
+    - `GET /v1/finance/forecast-points/{id}/lineage`
+  - Test suite (`tests/cfo/test_lineage.py`):
+    - Lineage resolution returning formula and contributing source rows.
+    - Core evidence target resolver lookups.
+    - Claim and evidence link creation.
+- **Assumptions Verified / Changed:**
+  - Verified that every weekly forecast point preserves refs to its underlying invoices and payroll obligations, enabling full backward auditability to raw source rows.
+- **Deviations from PDF:** None.
+
+
 
 
 

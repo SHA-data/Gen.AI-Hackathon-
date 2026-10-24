@@ -11,6 +11,7 @@ from services.api.app.cfo.importers.csv_importer import CsvImporter
 from services.api.app.cfo.models import ImportBatch
 from services.api.app.cfo.services.baseline_service import BaselineService
 from services.api.app.cfo.services.scenario_service import ScenarioService
+from services.api.app.cfo.verification.lineage import LineageResolver
 from services.api.app.core.audit import create_audit_log
 from services.api.app.core.auth import AuthContext, RoleChecker, get_auth_context
 from services.api.app.core.database import get_db
@@ -236,5 +237,20 @@ async def compare_scenario(
         org_id=auth.org_id,
         scenario_id=scenario_id,
     )
+
+
+@router.get("/forecast-points/{point_id}/lineage")
+async def get_forecast_point_lineage(
+    point_id: UUID,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Returns the calculation formula, active assumptions, and contributing source rows."""
+    return await LineageResolver.get_point_lineage(
+        session=db,
+        org_id=auth.org_id,
+        point_id=point_id,
+    )
+
 
 
