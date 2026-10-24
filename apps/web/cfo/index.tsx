@@ -11,18 +11,48 @@ export const CfoDashboard: React.FC = () => {
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 font-sans">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <header className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div
+      className="min-h-screen p-8 font-[var(--font-ui)] transition-colors"
+      style={{
+        backgroundColor: 'var(--bg)',
+        color: 'var(--text)',
+      }}
+    >
+      <div className="max-w-[1200px] mx-auto space-y-6">
+        {/* Header / Brand Wordmark */}
+        <header
+          className="flex justify-between items-center p-6 rounded-[var(--radius-card)] border shadow-sm transition-colors"
+          style={{
+            backgroundColor: 'var(--surface)',
+            borderColor: 'var(--divider)',
+          }}
+        >
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">NeuralCFO Mode</h1>
-            <p className="text-sm text-gray-500">
-              Deterministic Decision Support · Acme Digital Agency
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>
+                Neural<span style={{ color: 'var(--primary)' }}>CFO</span>
+              </span>
+              <span
+                className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-semibold"
+                style={{
+                  backgroundColor: 'var(--status-verified-bg)',
+                  color: 'var(--status-verified)',
+                }}
+              >
+                ✓ CFO Mode Active
+              </span>
+            </div>
+            <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>
+              Bold ideas with the numbers to check them. · Acme Digital Agency
             </p>
           </div>
           <button
             onClick={() => setIsUploadOpen(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow transition"
+            className="px-4 py-2 font-semibold text-xs rounded-[var(--radius-control)] shadow-sm transition hover:opacity-95"
+            style={{
+              backgroundColor: 'var(--primary)',
+              color: 'var(--on-primary)',
+            }}
           >
             Upload Financial CSV
           </button>
@@ -37,6 +67,7 @@ export const CfoDashboard: React.FC = () => {
             { week_number: 4, week_start: '2026-11-09', closing_cash: '127307.69' },
             { week_number: 5, week_start: '2026-11-16', closing_cash: '151076.92' },
           ]}
+          minCashDate="1 Feb 2027"
           onSelectPoint={() => setSelectedPointId('demo-point-uuid')}
         />
 
@@ -68,14 +99,34 @@ export const CfoDashboard: React.FC = () => {
             end_cash: '99230.77',
             runway_weeks: null,
             reserve_breach: false,
-            cash_floor_breach: true,
+            cash_floor_breach: false,
           }}
           onOpenEvidence={() => setSelectedPointId('demo-point-uuid')}
         />
 
-        {/* Modals & Drawers */}
-        <UploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
-        <EvidenceDrawer pointId={selectedPointId} onClose={() => setSelectedPointId(null)} />
+        {/* Mandatory Legal & Analytical Disclaimer */}
+        <footer
+          className="pt-4 pb-8 text-center text-[13px] leading-relaxed border-t"
+          style={{
+            borderColor: 'var(--divider)',
+            color: 'var(--muted)',
+          }}
+        >
+          Decision support, not financial advice. Forecasts depend on the assumptions shown and are not guaranteed predictions.
+        </footer>
+
+        {/* Upload Modal */}
+        <UploadModal
+          isOpen={isUploadOpen}
+          onClose={() => setIsUploadOpen(false)}
+          onSuccess={(rep) => console.log('Import finished:', rep)}
+        />
+
+        {/* Evidence Drawer */}
+        <EvidenceDrawer
+          pointId={selectedPointId}
+          onClose={() => setSelectedPointId(null)}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 export interface EvidenceDrawerProps {
   pointId: string | null;
@@ -53,6 +53,21 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
   const [data, setData] = useState<LineageData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+
+  // Close on Escape key press and focus management
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    if (pointId) {
+      window.addEventListener('keydown', handleKeyDown);
+      drawerRef.current?.focus();
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [pointId, onClose]);
 
   useEffect(() => {
     if (!pointId) {
@@ -60,167 +75,304 @@ export const EvidenceDrawer: React.FC<EvidenceDrawerProps> = ({
       return;
     }
 
-    const fetchLineage = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const headers: Record<string, string> = {};
-        if (authToken) {
-          headers['Authorization'] = `Bearer ${authToken}`;
-        }
-        const resp = await fetch(`${apiBaseUrl}/v1/finance/forecast-points/${pointId}/lineage`, {
-          headers,
-        });
-        if (!resp.ok) {
-          throw new Error(`Failed to load lineage: ${resp.statusText}`);
-        }
-        const json = await resp.json();
-        setData(json);
-      } catch (err: any) {
-        setError(err.message || 'Error fetching lineage');
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    setError(null);
 
-    fetchLineage();
+    fetch(`${apiBaseUrl}/v1/finance/forecast-points/${pointId}/lineage`, {
+      headers: {
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load evidence lineage (HTTP ${res.status})`);
+        }
+        return res.json();
+      })
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || 'Error loading lineage');
+        setLoading(false);
+      });
   }, [pointId, apiBaseUrl, authToken]);
 
   if (!pointId) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white shadow-2xl border-l border-gray-200 flex flex-col font-sans">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs font-semibold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-800">
-              Computed Claim
-            </span>
-            <span className="text-xs text-gray-500">ID: {pointId.slice(0, 8)}...</span>
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex justify-end transition-opacity">
+      <div
+        ref={drawerRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-label="Evidence & Mathematical Lineage Inspector"
+        className="w-full max-w-xl h-full shadow-2xl flex flex-col font-[var(--font-ui)] overflow-y-auto outline-none transition-colors"
+        style={{
+          backgroundColor: 'var(--surface)',
+          borderLeft: '1px solid var(--ui-border)',
+          color: 'var(--text)',
+        }}
+      >
+        {/* Header */}
+        <div
+          className="p-6 border-b flex justify-between items-start"
+          style={{
+            borderColor: 'var(--divider)',
+            backgroundColor: 'var(--bg)',
+          }}
+        >
+          <div>
+            <div className="flex items-center space-x-2">
+              <span
+                className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-semibold"
+                style={{
+                  backgroundColor: 'var(--tag-computed-bg)',
+                  color: 'var(--tag-computed)',
+                }}
+              >
+                <span>🧮</span>
+                <span>Computed Evidence</span>
+              </span>
+              <span
+                className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-semibold"
+                style={{
+                  backgroundColor: 'var(--status-verified-bg)',
+                  color: 'var(--status-verified)',
+                }}
+              >
+                <span>✓</span>
+                <span>Cryptographic Lineage</span>
+              </span>
+            </div>
+            <h2 className="text-xl font-bold mt-2" style={{ color: 'var(--text)' }}>
+              Forecast Point Lineage
+            </h2>
+            <p className="text-xs font-[var(--font-mono)] mt-1" style={{ color: 'var(--muted)' }}>
+              Point ID: {pointId}
+            </p>
           </div>
-          <h2 className="text-lg font-bold text-gray-900 mt-1">
-            {data ? `Week ${data.week_number} (${data.week_start})` : 'Evidence Drawer'}
-          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Close evidence drawer"
+            className="p-2 rounded-[var(--radius-control)] hover:opacity-80 transition"
+            style={{ color: 'var(--muted)' }}
+          >
+            ✕
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-200 transition"
-        >
-          <span className="sr-only">Close</span>
-          ✕
-        </button>
-      </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {loading && (
-          <div className="flex items-center justify-center py-12 text-gray-500">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-            Loading mathematical lineage...
-          </div>
-        )}
+        {/* Content */}
+        <div className="p-6 space-y-6 flex-1">
+          {loading && (
+            <div className="flex justify-center items-center py-12">
+              <span className="text-sm font-medium" style={{ color: 'var(--muted)' }}>
+                Verifying mathematical lineage...
+              </span>
+            </div>
+          )}
 
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {error}
-          </div>
-        )}
+          {error && (
+            <div
+              className="p-4 rounded-[var(--radius-control)] text-sm border flex items-center space-x-2"
+              style={{
+                backgroundColor: 'var(--status-failed-bg)',
+                borderColor: 'var(--status-failed)',
+                color: 'var(--status-failed)',
+              }}
+            >
+              <span>✕</span>
+              <span>{error}</span>
+            </div>
+          )}
 
-        {data && (
-          <>
-            {/* Calculation Formula */}
-            <div className="bg-slate-900 text-white rounded-lg p-4 font-mono text-xs shadow">
-              <div className="text-gray-400 mb-1 font-bold">MATHEMATICAL ARITHMETIC:</div>
-              <div className="text-green-400 font-semibold mb-3">{data.formula}</div>
-              <div className="space-y-1 text-slate-300">
-                <div className="flex justify-between">
-                  <span>Opening Cash:</span>
-                  <span className="font-bold text-white">${data.calculation.opening_cash}</span>
+          {data && (
+            <>
+              {/* Formula & Deterministic Math */}
+              <div
+                className="p-4 rounded-[var(--radius-control)] border"
+                style={{
+                  backgroundColor: 'var(--bg)',
+                  borderColor: 'var(--divider)',
+                }}
+              >
+                <div className="text-xs font-bold uppercase mb-2" style={{ color: 'var(--muted)' }}>
+                  Deterministic Recurrence Formula
                 </div>
-                <div className="flex justify-between">
-                  <span>+ Inflows:</span>
-                  <span className="text-emerald-400 font-bold">+${data.calculation.projected_inflows}</span>
+                <div
+                  className="font-[var(--font-mono)] text-sm p-3 rounded-[var(--radius-control)] border font-semibold"
+                  style={{
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--divider)',
+                    color: 'var(--text)',
+                  }}
+                >
+                  {data.formula}
                 </div>
-                <div className="flex justify-between">
-                  <span>- Outflows:</span>
-                  <span className="text-rose-400 font-bold">-${data.calculation.projected_outflows}</span>
-                </div>
-                <div className="border-t border-slate-700 pt-1 mt-1 flex justify-between text-yellow-400 font-bold">
-                  <span>Closing Balance:</span>
-                  <span>${data.calculation.closing_cash}</span>
+                <div className="grid grid-cols-2 gap-3 mt-3 text-xs font-[var(--font-mono)] tabular-nums">
+                  <div>
+                    <span style={{ color: 'var(--muted)' }}>Opening Cash:</span>{' '}
+                    <span className="font-semibold" style={{ color: 'var(--text)' }}>
+                      ${data.calculation.opening_cash}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--muted)' }}>Inflows:</span>{' '}
+                    <span className="font-semibold" style={{ color: 'var(--status-verified)' }}>
+                      +${data.calculation.projected_inflows}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--muted)' }}>Outflows:</span>{' '}
+                    <span className="font-semibold" style={{ color: 'var(--status-failed)' }}>
+                      -${data.calculation.projected_outflows}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--muted)' }}>Closing Cash:</span>{' '}
+                    <span className="font-semibold" style={{ color: 'var(--highlight-text)' }}>
+                      ${data.calculation.closing_cash}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Contributing Events */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-2">
-                Contributing Events
-              </h3>
-              {data.contributing_events.invoices.length > 0 ? (
-                <div className="space-y-2">
-                  {data.contributing_events.invoices.map((inv, idx) => (
-                    <div key={idx} className="p-3 bg-gray-50 border border-gray-200 rounded flex justify-between items-center text-sm">
-                      <div>
-                        <div className="font-semibold text-gray-900">{inv.client}</div>
-                        <div className="text-xs text-gray-500">{inv.invoice_number} · Due {inv.expected_payment_date}</div>
+              {/* Invoices Contributing */}
+              <div>
+                <h3 className="text-sm font-bold uppercase mb-2" style={{ color: 'var(--text)' }}>
+                  Contributing Invoices ({data.contributing_events.invoices.length})
+                </h3>
+                {data.contributing_events.invoices.length === 0 ? (
+                  <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                    No receivable receipts expected in this weekly window.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {data.contributing_events.invoices.map((inv, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-[var(--radius-control)] border flex justify-between items-center text-xs"
+                        style={{
+                          backgroundColor: 'var(--surface)',
+                          borderColor: 'var(--divider)',
+                        }}
+                      >
+                        <div>
+                          <div className="font-bold" style={{ color: 'var(--text)' }}>
+                            {inv.invoice_number} · {inv.client}
+                          </div>
+                          <div style={{ color: 'var(--muted)' }}>
+                            Expected: {inv.expected_payment_date}
+                          </div>
+                        </div>
+                        <div className="font-[var(--font-mono)] font-bold text-sm" style={{ color: 'var(--status-verified)' }}>
+                          +${inv.amount}
+                        </div>
                       </div>
-                      <div className="text-right font-mono font-bold text-emerald-600">+${inv.amount}</div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Source Rows */}
+              <div>
+                <h3 className="text-sm font-bold uppercase mb-2" style={{ color: 'var(--text)' }}>
+                  Underlying Raw Source Rows ({data.source_rows.length})
+                </h3>
+                {data.source_rows.length === 0 ? (
+                  <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                    No direct CSV source rows mapped to this specific window.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {data.source_rows.map((row) => (
+                      <div
+                        key={row.id}
+                        className="p-3 rounded-[var(--radius-control)] border text-xs font-[var(--font-mono)]"
+                        style={{
+                          backgroundColor: 'var(--bg)',
+                          borderColor: 'var(--divider)',
+                        }}
+                      >
+                        <div className="flex justify-between font-semibold pb-1 border-b" style={{ borderColor: 'var(--divider)', color: 'var(--text)' }}>
+                          <span>Source Row #{row.row_number}</span>
+                          <span className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                            ID: {row.id.slice(0, 8)}...
+                          </span>
+                        </div>
+                        <pre className="mt-2 text-[11px] overflow-x-auto" style={{ color: 'var(--muted)' }}>
+                          {JSON.stringify(row.payload, null, 2)}
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Assumptions */}
+              {data.active_assumptions && data.active_assumptions.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold uppercase mb-2" style={{ color: 'var(--text)' }}>
+                    Active Assumptions
+                  </h3>
+                  <div className="space-y-2">
+                    {data.active_assumptions.map((assump) => (
+                      <div
+                        key={assump.id}
+                        className="p-3 rounded-[var(--radius-control)] border text-xs"
+                        style={{
+                          backgroundColor: 'var(--surface)',
+                          borderColor: 'var(--divider)',
+                        }}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-[var(--radius-chip)] text-[11px] font-semibold"
+                            style={{
+                              backgroundColor: 'var(--tag-inferred-bg)',
+                              color: 'var(--tag-inferred)',
+                            }}
+                          >
+                            <span>✨</span>
+                            <span>Assumption</span>
+                          </span>
+                          <span className="font-[var(--font-mono)] font-bold" style={{ color: 'var(--text)' }}>
+                            {assump.key}
+                          </span>
+                        </div>
+                        <pre className="mt-1 text-[11px] font-[var(--font-mono)]" style={{ color: 'var(--muted)' }}>
+                          {JSON.stringify(assump.value)}
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <div className="text-xs text-gray-500 italic">No invoice inflows this week.</div>
               )}
-            </div>
+            </>
+          )}
+        </div>
 
-            {/* Raw Source Rows Traceability */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-2">
-                Source Row Audit Trail ({data.source_rows.length} rows)
-              </h3>
-              <div className="space-y-2">
-                {data.source_rows.map((row, idx) => (
-                  <div key={idx} className="p-3 bg-gray-50 border border-gray-200 rounded text-xs font-mono">
-                    <div className="flex justify-between text-gray-500 mb-1">
-                      <span>Row #{row.row_number}</span>
-                      <span>Ref: {row.id.slice(0, 8)}</span>
-                    </div>
-                    <pre className="bg-white p-2 rounded border border-gray-200 overflow-x-auto text-gray-700">
-                      {JSON.stringify(row.payload, null, 2)}
-                    </pre>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Active Assumptions */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-2">
-                Active Finance Assumptions
-              </h3>
-              <div className="space-y-1">
-                {data.active_assumptions.map((a, idx) => (
-                  <div key={idx} className="text-xs text-gray-600 bg-amber-50 border border-amber-200 p-2 rounded flex justify-between">
-                    <span className="font-semibold">{a.key}:</span>
-                    <span>{JSON.stringify(a.value)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50 text-right">
-        <button
-          onClick={onClose}
-          className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded transition"
+        {/* Footer */}
+        <div
+          className="p-4 border-t flex justify-end"
+          style={{
+            borderColor: 'var(--divider)',
+            backgroundColor: 'var(--bg)',
+          }}
         >
-          Close Drawer
-        </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-semibold rounded-[var(--radius-control)] border transition"
+            style={{
+              backgroundColor: 'var(--surface)',
+              borderColor: 'var(--ui-border)',
+              color: 'var(--text)',
+            }}
+          >
+            Close Inspector
+          </button>
+        </div>
       </div>
     </div>
   );
