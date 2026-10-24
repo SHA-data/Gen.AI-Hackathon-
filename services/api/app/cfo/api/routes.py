@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from packages.contracts.envelope import ToolResultEnvelope, ToolStatus
 from services.api.app.cfo.importers.csv_importer import CsvImporter
 from services.api.app.cfo.models import ImportBatch
+from services.api.app.cfo.services.baseline_service import BaselineService
 from services.api.app.core.audit import create_audit_log
 from services.api.app.core.auth import AuthContext, RoleChecker, get_auth_context
 from services.api.app.core.database import get_db
@@ -100,3 +101,88 @@ async def get_import_quality_report(
         "quality_report": batch.quality_report,
         "created_at": batch.created_at.isoformat(),
     }
+
+
+@router.post("/baseline/run")
+async def run_baseline_forecast(
+    horizon_weeks: int = 26,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generates an immutable baseline forecast for the tenant."""
+    run, points = await BaselineService.run_baseline(
+        session=db,
+        org_id=auth.org_id,
+        horizon_weeks=horizon_weeks,
+    )
+
+    await create_audit_log(
+        session=db,
+        org_id=auth.org_id,
+        actor_user_id=auth.user_id,
+        action="RUN_BASELINE",
+        entity_type="forecast_run",
+        entity_id=run.id,
+        decision="verified",
+        metadata={
+            "run_id": str(run.id),
+            "horizon_weeks": horizon_weeks,
+            "min_cash": f"{run.min_cash:.2f}",
+            "baseline_hash": run.baseline_hash,
+        },
+    )
+
+    return {
+        "run_id": str(run.id),
+        "case_type": run.case_type,
+        "engine_version": run.engine_version,
+        "horizon_weeks": run.horizon_weeks,
+        "min_cash": f"{run.min_cash:.2f}",
+        "min_cash_date": run.min_cash_date.isoformat(),
+        "end_cash": f"{run.end_cash:.2f}",
+        "runway_weeks": run.runway_weeks,
+        "reserve_breach": run.reserve_breach,
+        "cash_floor_breach": run.cash_floor_breach,
+        "baseline_hash": run.baseline_hash,
+        "weekly_points_count": len(points),
+    }
+
+
+@router.get("/baseline")
+async def get_baseline_forecast(
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve latest immutable baseline forecast."""
+    result = await BaselineService.get_latest_baseline(db, auth.org_id)
+    if not result:
+        raise NotFoundError("No baseline forecast found. Please run POST /v1/finance/baseline/run first.")
+    run, points = result
+
+    return {
+        "run_id": str(run.id),
+        "case_type": run.case_type,
+        "engine_version": run.engine_version,
+        "horizon_weeks": run.horizon_weeks,
+        "min_cash": f"{run.min_cash:.2f}",
+        "min_cash_date": run.min_cash_date.isoformat(),
+        "end_cash": f"{run.end_cash:.2f}",
+        "runway_weeks": run.runway_weeks,
+        "reserve_breach": run.reserve_breach,
+        "cash_floor_breach": run.cash_floor_breach,
+        "baseline_hash": run.baseline_hash,
+        "weekly_cash": [
+            {
+                "point_id": str(p.id),
+                "week_number": p.week_number,
+                "week_start": p.week_start.isoformat(),
+                "opening_cash": f"{p.opening_cash:.2f}",
+                "projected_inflows": f"{p.projected_inflows:.2f}",
+                "projected_outflows": f"{p.projected_outflows:.2f}",
+                "closing_cash": f"{p.closing_cash:.2f}",
+                "value_label": p.value_label,
+            }
+            for p in points
+        ],
+    }
+

@@ -90,5 +90,32 @@
   - Verified that historical actuals (`is_actual=True`) cannot be contaminated by scenario assumptions or forward expectations.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 4: Pure Deterministic Forecast Engine & Baseline Runner
+- **Timestamp:** 2026-10-24 12:45:00 UTC
+- **Built:**
+  - `ForecastEngine` (`services/api/app/cfo/engine/calculator.py`):
+    - Pure, deterministic calculation engine in Python without LLM or network I/O.
+    - Weekly accumulation: $C_t = C_{t-1} + I_t - O_t$ starting on ISO Monday.
+    - Schedule-scanned runway: exact week index where closing cash $< 0$, or `null` if cash never drops below zero.
+    - Dual cash-floor checking: evaluates both `reserve_amount` and `cash_floor_weeks` converted by average weekly committed outflow.
+    - Cryptographic SHA-256 schedule hash stamping to guarantee baseline immutability.
+  - `BaselineService` (`services/api/app/cfo/services/baseline_service.py`):
+    - Loads canonical inputs (settings, opening cash assumptions, active invoices, payroll obligations, recurring overhead).
+    - Persists `ForecastRun(case_type="baseline")` and canonical weekly `ForecastPoint` records.
+  - HTTP Endpoints:
+    - `POST /v1/finance/baseline/run`
+    - `GET /v1/finance/baseline`
+  - Test suite (`tests/cfo/test_engine_baseline.py`):
+    - Cash arithmetic penny-accuracy verification.
+    - Runway scanner detecting insolvency week.
+    - Reserve breach and cash floor breach detection.
+    - Baseline service generation and persistence test.
+- **Assumptions Verified / Changed:**
+  - Verified that baseline runs are stamped with a deterministic hash that remains invariant across runs with identical inputs.
+- **Deviations from PDF:** None.
+
+
 
 
