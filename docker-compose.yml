@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: neuralcfo-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: neuralcfo
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d neuralcfo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: neuralcfo-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    container_name: neuralcfo-api
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      ENV: dev
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/neuralcfo
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: demo-secret-key-change-in-production-never-commit-actual-secrets-32bytes
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/api:/app/services/api
+      - ./packages/contracts:/app/packages/contracts
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: neuralcfo-web
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web:/app
+
+volumes:
+  pgdata:
+  redisdata:

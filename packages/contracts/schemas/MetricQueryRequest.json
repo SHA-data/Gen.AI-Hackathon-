@@ -1,0 +1,39 @@
+{
+  "properties": {
+    "metric": {
+      "title": "Metric",
+      "type": "string"
+    },
+    "from_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "From Date"
+    },
+    "to_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "To Date"
+    }
+  },
+  "required": [
+    "metric"
+  ],
+  "title": "MetricQueryRequest",
+  "type": "object"
+}

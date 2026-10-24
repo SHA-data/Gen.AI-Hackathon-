@@ -1,0 +1,195 @@
+{
+  "$defs": {
+    "CaseResult": {
+      "properties": {
+        "weekly_cash": {
+          "items": {
+            "$ref": "#/$defs/WeeklyCashPoint"
+          },
+          "title": "Weekly Cash",
+          "type": "array"
+        },
+        "min_cash": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "title": "Min Cash"
+        },
+        "min_cash_date": {
+          "format": "date",
+          "title": "Min Cash Date",
+          "type": "string"
+        },
+        "end_cash": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "title": "End Cash"
+        },
+        "runway_weeks": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Weeks until projected cash < 0, or null",
+          "title": "Runway Weeks"
+        },
+        "reserve_breach": {
+          "default": false,
+          "description": "True if projected cash falls below reserve amount",
+          "title": "Reserve Breach",
+          "type": "boolean"
+        },
+        "cash_floor_breach": {
+          "default": false,
+          "description": "True if projected cash falls below weeks-converted floor",
+          "title": "Cash Floor Breach",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "min_cash",
+        "min_cash_date",
+        "end_cash"
+      ],
+      "title": "CaseResult",
+      "type": "object"
+    },
+    "ResultStatus": {
+      "enum": [
+        "verified",
+        "warning",
+        "unverified",
+        "failed"
+      ],
+      "title": "ResultStatus",
+      "type": "string"
+    },
+    "ScenarioCases": {
+      "properties": {
+        "expected": {
+          "$ref": "#/$defs/CaseResult"
+        },
+        "best": {
+          "$ref": "#/$defs/CaseResult"
+        },
+        "worst": {
+          "$ref": "#/$defs/CaseResult"
+        }
+      },
+      "required": [
+        "expected",
+        "best",
+        "worst"
+      ],
+      "title": "ScenarioCases",
+      "type": "object"
+    },
+    "WeeklyCashPoint": {
+      "properties": {
+        "week_start": {
+          "format": "date",
+          "title": "Week Start",
+          "type": "string"
+        },
+        "cash": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "title": "Cash"
+        }
+      },
+      "required": [
+        "week_start",
+        "cash"
+      ],
+      "title": "WeeklyCashPoint",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "run_id": {
+      "format": "uuid",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ResultStatus"
+    },
+    "engine_version": {
+      "title": "Engine Version",
+      "type": "string"
+    },
+    "currency": {
+      "maxLength": 3,
+      "minLength": 3,
+      "title": "Currency",
+      "type": "string"
+    },
+    "cases": {
+      "$ref": "#/$defs/ScenarioCases"
+    },
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "source_row_refs": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Source Row Refs",
+      "type": "array"
+    },
+    "evidence_refs": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "status",
+    "engine_version",
+    "currency",
+    "cases"
+  ],
+  "title": "ScenarioRunData",
+  "type": "object"
+}

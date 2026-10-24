@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "metric": {
+      "title": "Metric",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "type": "string"
+        }
+      ],
+      "title": "Value"
+    },
+    "currency": {
+      "title": "Currency",
+      "type": "string"
+    },
+    "from_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "From Date"
+    },
+    "to_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "To Date"
+    },
+    "source_row_refs": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Source Row Refs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "metric",
+    "value",
+    "currency"
+  ],
+  "title": "MetricResultData",
+  "type": "object"
+}

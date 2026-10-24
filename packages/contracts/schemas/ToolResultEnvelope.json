@@ -1,0 +1,54 @@
+{
+  "$defs": {
+    "ToolStatus": {
+      "enum": [
+        "ok",
+        "warning",
+        "failed"
+      ],
+      "title": "ToolStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "status": {
+      "$ref": "#/$defs/ToolStatus"
+    },
+    "data": {
+      "additionalProperties": true,
+      "title": "Data",
+      "type": "object"
+    },
+    "sources": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "title": "ToolResultEnvelope",
+  "type": "object"
+}

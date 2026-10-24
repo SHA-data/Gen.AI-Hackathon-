@@ -1,0 +1,153 @@
+{
+  "$defs": {
+    "LeverOp": {
+      "enum": [
+        "set",
+        "add",
+        "multiply"
+      ],
+      "title": "LeverOp",
+      "type": "string"
+    },
+    "ScenarioChange": {
+      "properties": {
+        "lever": {
+          "description": "Lever name from registry (e.g. hire, payment_delay)",
+          "title": "Lever",
+          "type": "string"
+        },
+        "op": {
+          "$ref": "#/$defs/LeverOp",
+          "default": "set",
+          "description": "Operation to apply: set, add, multiply"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Value to apply",
+          "title": "Value"
+        },
+        "start_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Effective start date",
+          "title": "Start Date"
+        },
+        "params": {
+          "additionalProperties": true,
+          "description": "Additional lever parameters",
+          "title": "Params",
+          "type": "object"
+        },
+        "is_assumption": {
+          "default": true,
+          "description": "Whether this change represents an assumption",
+          "title": "Is Assumption",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "lever",
+        "value"
+      ],
+      "title": "ScenarioChange",
+      "type": "object"
+    },
+    "ScenarioOrigin": {
+      "enum": [
+        "user",
+        "moonshot_card"
+      ],
+      "title": "ScenarioOrigin",
+      "type": "string"
+    },
+    "ScenarioPayload": {
+      "properties": {
+        "name": {
+          "description": "Scenario identifier or descriptive name",
+          "title": "Name",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/ScenarioOrigin",
+          "default": "user",
+          "description": "user or moonshot_card"
+        },
+        "source_card_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional card UUID if from Moonshot",
+          "title": "Source Card Id"
+        },
+        "changes": {
+          "description": "List of explicit lever changes",
+          "items": {
+            "$ref": "#/$defs/ScenarioChange"
+          },
+          "title": "Changes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ScenarioPayload",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "baseline_run_id": {
+      "description": "Reference baseline run UUID",
+      "format": "uuid",
+      "title": "Baseline Run Id",
+      "type": "string"
+    },
+    "horizon_weeks": {
+      "default": 26,
+      "description": "Forecast horizon in weeks (default 26, max 104)",
+      "maximum": 104,
+      "minimum": 1,
+      "title": "Horizon Weeks",
+      "type": "integer"
+    },
+    "scenario": {
+      "$ref": "#/$defs/ScenarioPayload",
+      "description": "Scenario definition with explicit changes"
+    }
+  },
+  "required": [
+    "baseline_run_id",
+    "scenario"
+  ],
+  "title": "ScenarioRunRequest",
+  "type": "object"
+}
