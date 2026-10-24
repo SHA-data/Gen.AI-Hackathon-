@@ -182,6 +182,29 @@
   - Verified that every weekly forecast point preserves refs to its underlying invoices and payroll obligations, enabling full backward auditability to raw source rows.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 8: Public Service Interfaces (Python & HTTP)
+- **Timestamp:** 2026-10-24 12:58:00 UTC
+- **Built:**
+  - `RealCfoSnapshotService` (`services/api/app/cfo/services/snapshot_service.py`):
+    - Production implementation returning `CfoSnapshotData` (cash, burn, revenue, receivables, payroll, baseline run id) in standard `ToolResultEnvelope`.
+  - `RealFinanceService` (`services/api/app/cfo/services/finance_service.py`):
+    - Real implementation of the 4 finance tools: `get_metric`, `run_scenario`, `list_source_rows`, `explain_change`.
+  - Full suite of public HTTP endpoints under `/v1/finance/*`:
+    - `GET /v1/finance/metrics`
+    - `GET /v1/finance/source-rows`
+    - `GET /v1/finance/snapshot`
+    - `GET /v1/finance/settings`
+    - `PATCH /v1/finance/settings` (role-gated: admin/owner only)
+  - Test suite (`tests/cfo/test_public_interfaces.py`):
+    - Python service invocations verifying tool envelope shape and exact numerical metrics.
+    - HTTP endpoint routing, query parameter validation, and role-based permissions (viewer rejected from patching settings).
+- **Assumptions Verified / Changed:**
+  - Confirmed that `RealCfoSnapshotService` and `RealFinanceService` output conforms byte-for-byte to the `FakeFinanceService` signatures used by Aleena and Aroon.
+- **Deviations from PDF:** None.
+
+
 
 
 

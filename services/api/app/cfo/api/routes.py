@@ -1,16 +1,21 @@
+from datetime import date
+from decimal import Decimal
 import json
 from typing import Any, Dict, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, Header, UploadFile
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.contracts.envelope import ToolResultEnvelope, ToolStatus
 from packages.contracts.finance import ScenarioRunRequest
 from services.api.app.cfo.importers.csv_importer import CsvImporter
-from services.api.app.cfo.models import ImportBatch
+from services.api.app.cfo.models import FinanceSettings, ImportBatch
 from services.api.app.cfo.services.baseline_service import BaselineService
+from services.api.app.cfo.services.finance_service import RealFinanceService
 from services.api.app.cfo.services.scenario_service import ScenarioService
+from services.api.app.cfo.services.snapshot_service import RealCfoSnapshotService
 from services.api.app.cfo.verification.lineage import LineageResolver
 from services.api.app.core.audit import create_audit_log
 from services.api.app.core.auth import AuthContext, RoleChecker, get_auth_context
@@ -251,6 +256,118 @@ async def get_forecast_point_lineage(
         org_id=auth.org_id,
         point_id=point_id,
     )
+
+
+@router.get("/metrics", response_model=ToolResultEnvelope)
+async def get_finance_metric(
+    metric: str,
+    from_date: Optional[date] = None,
+    to_date: Optional[date] = None,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve financial metric with source row references."""
+    return await RealFinanceService.get_metric(
+        session=db,
+        org_id=auth.org_id,
+        metric=metric,
+        from_date=from_date,
+        to_date=to_date,
+    )
+
+
+@router.get("/source-rows", response_model=ToolResultEnvelope)
+async def list_source_rows(
+    ref: Optional[str] = None,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """List raw source rows for tenant with optional ref filtering."""
+    return await RealFinanceService.list_source_rows(
+        session=db,
+        org_id=auth.org_id,
+        ref=ref,
+    )
+
+
+@router.get("/snapshot", response_model=ToolResultEnvelope)
+async def get_cfo_snapshot(
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """CfoSnapshotService endpoint consumed by Moonshot intake."""
+    return await RealCfoSnapshotService.get(
+        session=db,
+        org_id=auth.org_id,
+    )
+
+
+@router.get("/settings")
+async def get_finance_settings(
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve tenant finance settings."""
+    stmt = select(FinanceSettings).where(FinanceSettings.org_id == auth.org_id)
+    settings = (await db.execute(stmt)).scalar_one_or_none()
+    if not settings:
+        raise NotFoundError("Finance settings not found")
+
+    return {
+        "org_id": str(settings.org_id),
+        "reserve_amount": f"{settings.reserve_amount:.2f}",
+        "cash_floor_weeks": settings.cash_floor_weeks,
+        "worst_case_delay_days": settings.worst_case_delay_days,
+        "worst_case_rev_pct_delta": f"{settings.worst_case_rev_pct_delta:.2f}",
+        "best_case_advance_days": settings.best_case_advance_days,
+        "best_case_rev_pct_delta": f"{settings.best_case_rev_pct_delta:.2f}",
+        "currency": settings.currency,
+    }
+
+
+@router.patch("/settings")
+async def update_finance_settings(
+    payload: Dict[str, Any],
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update tenant finance settings. Admin/Owner only."""
+    RoleChecker("admin")(auth)
+
+    stmt = select(FinanceSettings).where(FinanceSettings.org_id == auth.org_id)
+    settings = (await db.execute(stmt)).scalar_one_or_none()
+    if not settings:
+        settings = FinanceSettings(org_id=auth.org_id)
+        db.add(settings)
+
+    if "reserve_amount" in payload:
+        settings.reserve_amount = Decimal(str(payload["reserve_amount"]))
+    if "cash_floor_weeks" in payload:
+        settings.cash_floor_weeks = int(payload["cash_floor_weeks"])
+    if "worst_case_delay_days" in payload:
+        settings.worst_case_delay_days = int(payload["worst_case_delay_days"])
+    if "worst_case_rev_pct_delta" in payload:
+        settings.worst_case_rev_pct_delta = Decimal(str(payload["worst_case_rev_pct_delta"]))
+    if "best_case_advance_days" in payload:
+        settings.best_case_advance_days = int(payload["best_case_advance_days"])
+    if "best_case_rev_pct_delta" in payload:
+        settings.best_case_rev_pct_delta = Decimal(str(payload["best_case_rev_pct_delta"]))
+
+    await db.commit()
+
+    await create_audit_log(
+        session=db,
+        org_id=auth.org_id,
+        actor_user_id=auth.user_id,
+        action="UPDATE_SETTINGS",
+        entity_type="finance_settings",
+        entity_id=settings.id,
+        decision="applied",
+        metadata={"updated_keys": list(payload.keys())},
+    )
+
+    return {"status": "ok", "message": "Settings updated successfully"}
+
 
 
 
