@@ -6,9 +6,11 @@ from fastapi import APIRouter, Depends, File, Form, Header, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.contracts.envelope import ToolResultEnvelope, ToolStatus
+from packages.contracts.finance import ScenarioRunRequest
 from services.api.app.cfo.importers.csv_importer import CsvImporter
 from services.api.app.cfo.models import ImportBatch
 from services.api.app.cfo.services.baseline_service import BaselineService
+from services.api.app.cfo.services.scenario_service import ScenarioService
 from services.api.app.core.audit import create_audit_log
 from services.api.app.core.auth import AuthContext, RoleChecker, get_auth_context
 from services.api.app.core.database import get_db
@@ -185,4 +187,54 @@ async def get_baseline_forecast(
             for p in points
         ],
     }
+
+
+@router.post("/scenarios/run", response_model=ToolResultEnvelope)
+async def run_scenario(
+    request: ScenarioRunRequest,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Executes the Finance Engine Contract v1 (Section 8 / Part A5).
+
+    Deterministic, pure delta application, 3 cases (expected, best, worst).
+    """
+    envelope = await ScenarioService.run_scenario(
+        session=db,
+        org_id=auth.org_id,
+        request=request,
+    )
+
+    await create_audit_log(
+        session=db,
+        org_id=auth.org_id,
+        actor_user_id=auth.user_id,
+        action="RUN_SCENARIO",
+        entity_type="scenario",
+        entity_id=UUID(envelope.run_id) if envelope.run_id else None,
+        decision="executed",
+        metadata={
+            "scenario_name": request.scenario.name,
+            "origin": request.scenario.origin.value,
+            "changes_count": len(request.scenario.changes),
+            "run_id": envelope.run_id,
+        },
+    )
+
+    return envelope
+
+
+@router.get("/scenarios/{scenario_id}/compare")
+async def compare_scenario(
+    scenario_id: UUID,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Compares baseline vs scenario cases side-by-side."""
+    return await ScenarioService.compare_scenarios(
+        session=db,
+        org_id=auth.org_id,
+        scenario_id=scenario_id,
+    )
+
 

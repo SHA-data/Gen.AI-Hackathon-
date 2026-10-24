@@ -116,6 +116,31 @@
   - Verified that baseline runs are stamped with a deterministic hash that remains invariant across runs with identical inputs.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 5: Scenarios & 3-Case Simulation Engine
+- **Timestamp:** 2026-10-24 12:48:00 UTC
+- **Built:**
+  - `LeverDispatcher` (`services/api/app/cfo/engine/levers.py`):
+    - Full MVP lever registry: `hire`, `payment_delay`, `payment_terms_days`, `deposit_pct`, `revenue_change_pct`, `lost_client`, `price_change_pct`, `expense_change`.
+    - Pure delta transformations over in-memory event sequences; database invoice records and transaction history are never mutated.
+  - `ScenarioService` (`services/api/app/cfo/services/scenario_service.py`):
+    - Generates three discrete cases (`expected`, `best`, `worst`) for every scenario execution.
+    - Persists `Scenario`, `ScenarioChange`, and three `ForecastRun` instances with weekly `ForecastPoint` rows.
+    - Strictly checks and verifies baseline immutability (asserts `refreshed_baseline.baseline_hash == original_baseline_hash`).
+  - HTTP Endpoints in `services/api/app/cfo/api/routes.py`:
+    - `POST /v1/finance/scenarios/run`: Real implementation of Part A5 / Section 8 Contract v1.
+    - `GET /v1/finance/scenarios/{id}/compare`: Side-by-side comparative inspection.
+  - Test suite (`tests/cfo/test_scenarios.py`):
+    - Multi-lever execution (hire 2 devs + 30-day payment delay) with 3-case generation.
+    - Invariant check proving database `invoices` table is completely unmutated by payment delays.
+    - Baseline immutability property test.
+    - HTTP scenario runner and compare API tests.
+- **Assumptions Verified / Changed:**
+  - Confirmed that worst-case shifts uncertain client receivables by $+14$ days and degrades revenue changes by $-10\%$ relative, while best-case advances uncertain receivables by $-7$ days and boosts revenue by $+5\%$.
+- **Deviations from PDF:** None.
+
+
 
 
 
