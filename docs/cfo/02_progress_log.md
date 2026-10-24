@@ -51,3 +51,28 @@
   - Confirmed that every canonical invoice, payroll item, and transaction has a non-null `source_row_id` pointing to its exact JSONB raw row in `source_rows`.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 2: CSV Import & Quality Report Engine
+- **Timestamp:** 2026-10-24 12:40:00 UTC
+- **Built:**
+  - `ColumnMapper` (`services/api/app/cfo/importers/column_mapper.py`) with header heuristics and explicit ambiguity detection (e.g., collision between multiple date or amount headers).
+  - `CsvImporter` (`services/api/app/cfo/importers/csv_importer.py`):
+    - Multi-tenant, stream-based CSV parsing with content hashing (SHA-256) and idempotency guards.
+    - Preserves 100% of raw inputs in `source_rows` (JSONB) with row numbers.
+    - Detects duplicate invoice numbers, flagging them into `anomaly_flags` without deleting or crashing.
+    - Assembles comprehensive `Quality Report` containing total, accepted, rejected, and flagged anomaly counts and reasons.
+  - HTTP Endpoints in `services/api/app/cfo/api/routes.py`:
+    - `POST /v1/finance/imports`: Multipart upload protected by admin/owner role check.
+    - `GET /v1/finance/imports/{id}`: Detailed quality report inspection.
+  - Test suite (`tests/cfo/test_csv_importer.py`):
+    - Idempotent import and raw row preservation in `source_rows`.
+    - Duplicate invoice number flagging into `anomaly_flags`.
+    - Column mapping ambiguity detection entering `needs_mapping` status.
+    - Rejected corrupt rows with reasons recorded in quality report.
+    - Security check ensuring `viewer` cannot import (HTTP 403 Forbidden).
+- **Assumptions Verified / Changed:**
+  - Verified that duplicate invoice items are flagged in `anomaly_flags` with status `flagged` and preserved in `source_rows` without interrupting batch completion.
+- **Deviations from PDF:** None.
+
+

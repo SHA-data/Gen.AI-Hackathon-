@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, status
 from pydantic import BaseModel, Field
 
 from packages.contracts.envelope import ErrorEnvelope
+from services.api.app.cfo.api.routes import router as finance_router
 from services.api.app.core.auth import (
     AuthContext,
     create_access_token,
@@ -29,6 +30,9 @@ app.add_exception_handler(Exception, global_exception_handler)
 
 # Middleware
 app.add_middleware(RequestIdMiddleware)
+
+# Mount CFO routes
+app.include_router(finance_router)
 
 
 class DevTokenRequest(BaseModel):
