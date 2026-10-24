@@ -204,6 +204,27 @@
   - Confirmed that `RealCfoSnapshotService` and `RealFinanceService` output conforms byte-for-byte to the `FakeFinanceService` signatures used by Aleena and Aroon.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 9: Sponsor Adapter (Zetaris & CsvAdapter)
+- **Timestamp:** 2026-10-24 13:01:00 UTC
+- **Built:**
+  - `FinanceDataSource` interface (`services/api/app/cfo/adapters/base.py`).
+  - `CsvAdapter` (`services/api/app/cfo/adapters/csv_adapter.py`) querying canonical transactions and invoices.
+  - `ZetarisAdapter` (`services/api/app/cfo/adapters/zetaris_adapter.py`):
+    - Provides real query structure when `ZETARIS_ENDPOINT` and `ZETARIS_API_KEY` are provided.
+    - Ships a safe, clearly labeled mock fallback when organizer credentials are pending.
+    - Implements `smoke_test()` verifying connection, transaction query, and invoice query.
+  - HTTP Endpoint: `GET /v1/finance/zetaris/smoke-test`.
+  - Test suite (`tests/cfo/test_zetaris_adapter.py`):
+    - `test_zetaris_smoke_test`: verifies smoke test passes and returns labeled rows.
+    - `test_csv_adapter_queries`: tests SQL-backed adapter.
+    - `test_http_zetaris_smoke_test_endpoint`: tests HTTP route.
+- **Assumptions Verified / Changed:**
+  - Verified that NeuralCFO can query external networked data through the adapter without inventing unannounced sponsor APIs.
+- **Deviations from PDF:** None.
+
+
 
 
 

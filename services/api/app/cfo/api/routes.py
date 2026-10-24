@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.contracts.envelope import ToolResultEnvelope, ToolStatus
 from packages.contracts.finance import ScenarioRunRequest
+from services.api.app.cfo.adapters.zetaris_adapter import ZetarisAdapter
 from services.api.app.cfo.importers.csv_importer import CsvImporter
 from services.api.app.cfo.models import FinanceSettings, ImportBatch
 from services.api.app.cfo.services.baseline_service import BaselineService
@@ -367,6 +368,15 @@ async def update_finance_settings(
     )
 
     return {"status": "ok", "message": "Settings updated successfully"}
+
+
+@router.get("/zetaris/smoke-test")
+async def zetaris_smoke_test(
+    auth: AuthContext = Depends(get_auth_context),
+):
+    """Day-1 smoke test verifying the Zetaris integration path and fallback."""
+    return await ZetarisAdapter.smoke_test()
+
 
 
 
