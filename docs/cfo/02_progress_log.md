@@ -75,4 +75,20 @@
   - Verified that duplicate invoice items are flagged in `anomaly_flags` with status `flagged` and preserved in `source_rows` without interrupting batch completion.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 3: Canonical Financial Model & Constraints
+- **Timestamp:** 2026-10-24 12:42:00 UTC
+- **Built:**
+  - Verification of all check constraints across canonical CFO models:
+    - Invoices: `kind` (`receivable|payable`), `status` (`draft|issued|paid|late|disputed|written_off`).
+    - Payroll: `pay_frequency` (`weekly|biweekly|monthly`).
+    - Forecast Points: `value_label` (`observed|calculated|estimated|hypothetical`).
+    - Forecast Runs: `case_type` (`baseline|expected|best|worst`), `status` (`verified|warning|unverified|failed`).
+  - Unit tests in `tests/cfo/test_cfo_models.py` verifying database-level constraint enforcement and strict separation of actuals, expected receivables, and hypothetical projections.
+- **Assumptions Verified / Changed:**
+  - Verified that historical actuals (`is_actual=True`) cannot be contaminated by scenario assumptions or forward expectations.
+- **Deviations from PDF:** None.
+
+
 
