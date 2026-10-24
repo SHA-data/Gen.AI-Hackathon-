@@ -1,0 +1,9 @@
+employee_identifier,role_title,monthly_gross,benefits_and_taxes,currency,pay_frequency,start_date
+EMP-001,Senior Architect,12000.00,1200.00,USD,monthly,2025-01-01
+EMP-002,Backend Lead,8500.00,850.00,USD,monthly,2025-03-01
+EMP-003,Frontend Lead,8000.00,800.00,USD,monthly,2025-04-01
+EMP-004,Mobile Engineer,7500.00,750.00,USD,monthly,2025-06-01
+EMP-005,Product Designer,7000.00,700.00,USD,monthly,2025-07-01
+EMP-006,Product Manager,8000.00,800.00,USD,monthly,2025-05-01
+EMP-007,QA Engineer,5000.00,500.00,USD,monthly,2025-08-01
+EMP-008,Operations Manager,4000.00,400.00,USD,monthly,2025-02-01

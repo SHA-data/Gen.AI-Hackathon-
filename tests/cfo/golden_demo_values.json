@@ -1,0 +1,61 @@
+{
+  "org_id": "00000000-0000-0000-0000-000000000001",
+  "org_name": "Acme Digital Agency",
+  "currency": "USD",
+  "as_of_date": "2026-10-22",
+  "opening_cash": "185000.00",
+  "reserve_amount": "50000.00",
+  "cash_floor_weeks": 12,
+  "concentrated_client": {
+    "name": "Apex Corp",
+    "monthly_retainer": "45000.00",
+    "revenue_share_pct": 36.89
+  },
+  "payroll": {
+    "headcount": 8,
+    "monthly_total": "60000.00",
+    "pay_day": 28
+  },
+  "demo_scenario": {
+    "name": "hire_two_devs_with_apex_30d_delay",
+    "levers": [
+      {
+        "lever": "hire",
+        "count": 2,
+        "monthly_cost": "7000.00",
+        "start_date": "2026-11-01"
+      },
+      {
+        "lever": "payment_delay",
+        "client": "Apex Corp",
+        "days": 30
+      }
+    ],
+    "cases": {
+      "expected": {
+        "min_cash": "18400.00",
+        "min_cash_date": "2027-02-01",
+        "end_cash": "30100.00",
+        "runway_weeks": null,
+        "reserve_breach": true,
+        "cash_floor_breach": true
+      },
+      "worst": {
+        "min_cash": "-4200.00",
+        "min_cash_date": "2027-01-18",
+        "end_cash": "-8900.00",
+        "runway_weeks": 12,
+        "reserve_breach": true,
+        "cash_floor_breach": true
+      },
+      "best": {
+        "min_cash": "52000.00",
+        "min_cash_date": "2026-11-30",
+        "end_cash": "85000.00",
+        "runway_weeks": null,
+        "reserve_breach": false,
+        "cash_floor_breach": false
+      }
+    }
+  }
+}

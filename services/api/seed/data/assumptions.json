@@ -1,0 +1,26 @@
+[
+  {
+    "category": "opening_cash",
+    "key": "primary_operating_account",
+    "value": {"amount": "185000.00", "currency": "USD"},
+    "valid_from": "2026-10-22"
+  },
+  {
+    "category": "payroll_schedule",
+    "key": "monthly_pay_day",
+    "value": {"day_of_month": 28},
+    "valid_from": "2026-01-01"
+  },
+  {
+    "category": "recurring_overhead",
+    "key": "office_rent",
+    "value": {"amount": "5000.00", "currency": "USD", "day_of_month": 1},
+    "valid_from": "2026-01-01"
+  },
+  {
+    "category": "recurring_overhead",
+    "key": "cloud_saas",
+    "value": {"amount": "10000.00", "currency": "USD", "day_of_month": 15},
+    "valid_from": "2026-01-01"
+  }
+]

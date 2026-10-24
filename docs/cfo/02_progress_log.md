@@ -31,3 +31,23 @@
   - Confirmed and verified that `0001_core` tables provide clean isolation and immutable audit logs.
   - Confirmed `FakeFinanceService` matches exact signatures and envelope structure required by Aleena and Aroon.
 - **Deviations from PDF:** None.
+
+---
+
+## Slice 1: Synthetic Demo Dataset & Seed Script
+- **Timestamp:** 2026-10-24 12:35:00 UTC
+- **Built:**
+  - Alembic migration `0100_cfo_tables.py` creating the 12 CFO tables with constraints, indexes, and composite org checks.
+  - SQLAlchemy models in `services/api/app/cfo/models/cfo_models.py`.
+  - Synthetic dataset files in `services/api/seed/data/`:
+    - `invoices.csv`: 26 forward invoices covering 8 agency clients, including concentrated client Apex Corp ($45,000/mo).
+    - `payroll.csv`: 8 employee lines totaling $60,000/month committed payroll.
+    - `transactions.csv`: Historical cash movements and overhead receipts.
+    - `assumptions.json`: Opening cash of $185,000.00 as of 2026-10-22 and payroll schedules.
+  - Golden values reference file `tests/cfo/golden_demo_values.json` locking in target baseline and scenario numbers.
+  - Seed script `services/api/seed/seed_demo_agency.py` populating records with explicit foreign keys to `source_rows.id`.
+  - Integrity unit test `tests/cfo/test_seed_dataset.py` verifying full relational integrity and lineage.
+- **Assumptions Verified / Changed:**
+  - Confirmed that every canonical invoice, payroll item, and transaction has a non-null `source_row_id` pointing to its exact JSONB raw row in `source_rows`.
+- **Deviations from PDF:** None.
+
