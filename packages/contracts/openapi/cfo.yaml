@@ -1,0 +1,817 @@
+openapi: 3.1.0
+info:
+  title: NeuralCFO API
+  description: Unified Backend for NeuralCFO, Moonshot Mode, and Chatbot Gateway
+  version: 0.1.0
+paths:
+  /v1/finance/imports:
+    post:
+      tags:
+      - Finance
+      summary: Import Financial File
+      description: 'Multipart CSV ingestion endpoint. Admin/owner only.
+
+
+        Idempotent by file hash or Idempotency-Key.
+
+        Duplicates are FLAGGED, never silently deleted.
+
+        Ambiguities are surfaced in the Quality Report.'
+      operationId: import_financial_file_v1_finance_imports_post
+      parameters:
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_import_financial_file_v1_finance_imports_post'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/imports/{batch_id}:
+    get:
+      tags:
+      - Finance
+      summary: Get Import Quality Report
+      description: Retrieve full quality report for an import batch.
+      operationId: get_import_quality_report_v1_finance_imports__batch_id__get
+      parameters:
+      - name: batch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Batch Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/baseline/run:
+    post:
+      tags:
+      - Finance
+      summary: Run Baseline Forecast
+      description: Generates an immutable baseline forecast for the tenant.
+      operationId: run_baseline_forecast_v1_finance_baseline_run_post
+      parameters:
+      - name: horizon_weeks
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 26
+          title: Horizon Weeks
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/baseline:
+    get:
+      tags:
+      - Finance
+      summary: Get Baseline Forecast
+      description: Retrieve latest immutable baseline forecast.
+      operationId: get_baseline_forecast_v1_finance_baseline_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/scenarios/run:
+    post:
+      tags:
+      - Finance
+      summary: Run Scenario
+      description: 'Executes the Finance Engine Contract v1 (Section 8 / Part A5).
+
+
+        Deterministic, pure delta application, 3 cases (expected, best, worst).'
+      operationId: run_scenario_v1_finance_scenarios_run_post
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioRunRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResultEnvelope'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/scenarios/{scenario_id}/compare:
+    get:
+      tags:
+      - Finance
+      summary: Compare Scenario
+      description: Compares baseline vs scenario cases side-by-side.
+      operationId: compare_scenario_v1_finance_scenarios__scenario_id__compare_get
+      parameters:
+      - name: scenario_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Scenario Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/forecast-points/{point_id}/lineage:
+    get:
+      tags:
+      - Finance
+      summary: Get Forecast Point Lineage
+      description: Returns the calculation formula, active assumptions, and contributing
+        source rows.
+      operationId: get_forecast_point_lineage_v1_finance_forecast_points__point_id__lineage_get
+      parameters:
+      - name: point_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Point Id
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/metrics:
+    get:
+      tags:
+      - Finance
+      summary: Get Finance Metric
+      description: Retrieve financial metric with source row references.
+      operationId: get_finance_metric_v1_finance_metrics_get
+      parameters:
+      - name: metric
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Metric
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: From Date
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: To Date
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResultEnvelope'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/source-rows:
+    get:
+      tags:
+      - Finance
+      summary: List Source Rows
+      description: List raw source rows for tenant with optional ref filtering.
+      operationId: list_source_rows_v1_finance_source_rows_get
+      parameters:
+      - name: ref
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ref
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResultEnvelope'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/snapshot:
+    get:
+      tags:
+      - Finance
+      summary: Get Cfo Snapshot
+      description: CfoSnapshotService endpoint consumed by Moonshot intake.
+      operationId: get_cfo_snapshot_v1_finance_snapshot_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolResultEnvelope'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/settings:
+    get:
+      tags:
+      - Finance
+      summary: Get Finance Settings
+      description: Retrieve tenant finance settings.
+      operationId: get_finance_settings_v1_finance_settings_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - Finance
+      summary: Update Finance Settings
+      description: Update tenant finance settings. Admin/Owner only.
+      operationId: update_finance_settings_v1_finance_settings_patch
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Payload
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/finance/zetaris/smoke-test:
+    get:
+      tags:
+      - Finance
+      summary: Zetaris Smoke Test
+      description: Day-1 smoke test verifying the Zetaris integration path and fallback.
+      operationId: zetaris_smoke_test_v1_finance_zetaris_smoke_test_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /health:
+    get:
+      tags:
+      - Health
+      summary: Health Check
+      operationId: health_check_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/dev/token:
+    post:
+      tags:
+      - Auth
+      summary: Create Dev Token
+      description: 'Mints authentication tokens for seeded demo users in two demo
+        orgs.
+
+
+        Disabled unless ENV=dev.'
+      operationId: create_dev_token_v1_dev_token_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevTokenResponse'
+        '403':
+          description: Forbidden if not dev environment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/me:
+    get:
+      tags:
+      - Auth
+      summary: Get Current User
+      operationId: get_current_user_v1_me_get
+      parameters:
+      - name: authorization
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    Body_import_financial_file_v1_finance_imports_post:
+      properties:
+        file:
+          type: string
+          contentMediaType: application/octet-stream
+          title: File
+        file_type:
+          type: string
+          title: File Type
+          default: invoices
+        column_mapping:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Column Mapping
+      type: object
+      required:
+      - file
+      title: Body_import_financial_file_v1_finance_imports_post
+    DevTokenRequest:
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          title: User Id
+        org_id:
+          type: string
+          format: uuid
+          title: Org Id
+        role:
+          type: string
+          title: Role
+          description: owner | admin | member | viewer
+          default: member
+      type: object
+      required:
+      - user_id
+      - org_id
+      title: DevTokenRequest
+    DevTokenResponse:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+          default: bearer
+        org_id:
+          type: string
+          format: uuid
+          title: Org Id
+        user_id:
+          type: string
+          format: uuid
+          title: User Id
+        role:
+          type: string
+          title: Role
+      type: object
+      required:
+      - access_token
+      - org_id
+      - user_id
+      - role
+      title: DevTokenResponse
+    ErrorDetail:
+      properties:
+        code:
+          type: string
+          title: Code
+        message:
+          type: string
+          title: Message
+        details:
+          additionalProperties: true
+          type: object
+          title: Details
+        request_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Request Id
+      type: object
+      required:
+      - code
+      - message
+      title: ErrorDetail
+    ErrorEnvelope:
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      type: object
+      required:
+      - error
+      title: ErrorEnvelope
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LeverOp:
+      type: string
+      enum:
+      - set
+      - add
+      - multiply
+      title: LeverOp
+    ScenarioChange:
+      properties:
+        lever:
+          type: string
+          title: Lever
+          description: Lever name from registry (e.g. hire, payment_delay)
+        op:
+          $ref: '#/components/schemas/LeverOp'
+          description: 'Operation to apply: set, add, multiply'
+          default: set
+        value:
+          anyOf:
+          - type: number
+          - type: string
+            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
+          - type: integer
+          - type: string
+          title: Value
+          description: Value to apply
+        start_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Start Date
+          description: Effective start date
+        params:
+          additionalProperties: true
+          type: object
+          title: Params
+          description: Additional lever parameters
+        is_assumption:
+          type: boolean
+          title: Is Assumption
+          description: Whether this change represents an assumption
+          default: true
+      type: object
+      required:
+      - lever
+      - value
+      title: ScenarioChange
+    ScenarioOrigin:
+      type: string
+      enum:
+      - user
+      - moonshot_card
+      title: ScenarioOrigin
+    ScenarioPayload:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Scenario identifier or descriptive name
+        origin:
+          $ref: '#/components/schemas/ScenarioOrigin'
+          description: user or moonshot_card
+          default: user
+        source_card_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Source Card Id
+          description: Optional card UUID if from Moonshot
+        changes:
+          items:
+            $ref: '#/components/schemas/ScenarioChange'
+          type: array
+          title: Changes
+          description: List of explicit lever changes
+      type: object
+      required:
+      - name
+      title: ScenarioPayload
+    ScenarioRunRequest:
+      properties:
+        baseline_run_id:
+          type: string
+          format: uuid
+          title: Baseline Run Id
+          description: Reference baseline run UUID
+        horizon_weeks:
+          type: integer
+          maximum: 104.0
+          minimum: 1.0
+          title: Horizon Weeks
+          description: Forecast horizon in weeks (default 26, max 104)
+          default: 26
+        scenario:
+          $ref: '#/components/schemas/ScenarioPayload'
+          description: Scenario definition with explicit changes
+      type: object
+      required:
+      - baseline_run_id
+      - scenario
+      title: ScenarioRunRequest
+    ToolResultEnvelope:
+      properties:
+        status:
+          $ref: '#/components/schemas/ToolStatus'
+        data:
+          additionalProperties: true
+          type: object
+          title: Data
+        sources:
+          items:
+            type: string
+          type: array
+          title: Sources
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+        run_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Run Id
+      type: object
+      required:
+      - status
+      title: ToolResultEnvelope
+    ToolStatus:
+      type: string
+      enum:
+      - ok
+      - warning
+      - failed
+      title: ToolStatus
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
