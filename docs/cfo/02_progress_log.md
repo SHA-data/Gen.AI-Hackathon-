@@ -140,6 +140,26 @@
   - Confirmed that worst-case shifts uncertain client receivables by $+14$ days and degrades revenue changes by $-10\%$ relative, while best-case advances uncertain receivables by $-7$ days and boosts revenue by $+5\%$.
 - **Deviations from PDF:** None.
 
+---
+
+## Slice 6: Finance Verifier (V1, V4, V5 Checks)
+- **Timestamp:** 2026-10-24 12:50:00 UTC
+- **Built:**
+  - `FinanceVerifier` (`services/api/app/cfo/verification/verifier.py`):
+    - V1 Numbers: Recomputes min cash, closing cash, and weekly progressions from stored points; aborts with `status: "failed"` upon any discrepancy.
+    - V4 Scenarios: Strictly verifies that the scenario's recorded `baseline_hash` matches the reference baseline run.
+    - V5 Units & Consistency: Asserts 3-character currency codes, arithmetic sign balance ($C_t = C_{t-1} + I_t - O_t$), and strict 7-day Monday date continuity.
+    - Result status classification: `verified`, `warning` (for reserve or cash floor breaches), and `failed` (arithmetic or baseline corruption, returning no numbers).
+  - Test suite (`tests/cfo/test_verifier.py`):
+    - Clean verification of baseline run (detects cash floor warning).
+    - Hard failure on tampered point arithmetic.
+    - Hard failure on broken date sequencing.
+    - Hard failure on diverged baseline hash.
+- **Assumptions Verified / Changed:**
+  - Verified that cash floor breaches correctly return `ResultStatus.WARNING` with diagnostic text, satisfying both safety and user transparency requirements.
+- **Deviations from PDF:** None.
+
+
 
 
 
