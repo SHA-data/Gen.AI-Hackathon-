@@ -36,6 +36,8 @@ htmlcov/
 node_modules/
 .next/
 out/
+*.tsbuildinfo
+
 
 # Database & IDE
 *.sqlite3
