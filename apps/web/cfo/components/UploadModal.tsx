@@ -278,6 +278,16 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   Batch ID: {report.batch_id}
                 </div>
               )}
+              <div
+                className="p-2.5 rounded-[var(--radius-control)] text-xs font-semibold flex items-center space-x-2"
+                style={{
+                  backgroundColor: 'var(--status-verified-bg)',
+                  color: 'var(--status-verified)',
+                }}
+              >
+                <span>✓</span>
+                <span>Records stored in canonical ledger. Click below to recalculate the 26-week forecast.</span>
+              </div>
             </div>
           )}
         </div>
@@ -298,19 +308,36 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               color: 'var(--text)',
             }}
           >
-            Cancel
+            {report ? 'Dismiss' : 'Cancel'}
           </button>
-          <button
-            onClick={handleUpload}
-            disabled={!file || uploading}
-            className="px-4 py-2 text-xs font-semibold rounded-[var(--radius-control)] transition disabled:opacity-50"
-            style={{
-              backgroundColor: 'var(--primary)',
-              color: 'var(--on-primary)',
-            }}
-          >
-            {uploading ? 'Validating...' : 'Upload & Verify'}
-          </button>
+          {report ? (
+            <button
+              onClick={() => {
+                onSuccess(report);
+                onClose();
+              }}
+              className="px-4 py-2 text-xs font-bold rounded-[var(--radius-control)] shadow-md transition hover:opacity-90 flex items-center space-x-1.5"
+              style={{
+                backgroundColor: 'var(--status-verified)',
+                color: '#FFFFFF',
+              }}
+            >
+              <span>Apply to Forecast & Recalculate</span>
+              <span>→</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleUpload}
+              disabled={!file || uploading}
+              className="px-4 py-2 text-xs font-semibold rounded-[var(--radius-control)] transition disabled:opacity-50"
+              style={{
+                backgroundColor: 'var(--primary)',
+                color: 'var(--on-primary)',
+              }}
+            >
+              {uploading ? 'Validating...' : 'Upload & Verify'}
+            </button>
+          )}
         </div>
       </div>
     </div>

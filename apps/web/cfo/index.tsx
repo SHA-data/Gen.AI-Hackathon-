@@ -31,8 +31,83 @@ export const CfoDashboard: React.FC = () => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [isScenarioLoading, setIsScenarioLoading] = useState(false);
+  const [isBaselineLoading, setIsBaselineLoading] = useState(false);
+  const [baselineRunId, setBaselineRunId] = useState<string>('00000000-0000-0000-0000-000000000100');
+  const [notification, setNotification] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [authToken, setAuthToken] = useState<string>('');
+
+  // Fetch live baseline schedule and points from backend
+  const fetchLiveBaseline = async (tokenOverride?: string) => {
+    const token = tokenOverride || authToken;
+    if (!token) return;
+
+    try {
+      const res = await fetch('http://localhost:8000/v1/finance/baseline', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.run_id) {
+          setBaselineRunId(data.run_id);
+        }
+        if (data.weekly_cash && data.weekly_cash.length > 0) {
+          const mapped: WeeklyPoint[] = data.weekly_cash.map((c: any) => ({
+            point_id: c.point_id,
+            week_number: c.week_number,
+            week_start: c.week_start,
+            closing_cash: c.cash,
+          }));
+          setChartPoints(mapped);
+        }
+        setBaselineCase({
+          min_cash: data.min_cash || '114000.00',
+          end_cash: data.end_cash || '225000.00',
+          runway_weeks: data.runway_weeks,
+          reserve_breach: data.reserve_breach,
+          cash_floor_breach: data.cash_floor_breach,
+        });
+      }
+    } catch (err) {
+      console.warn('Deferred baseline fetch:', err);
+    }
+  };
+
+  // Recalculate deterministic baseline from current canonical database rows
+  const recalculateBaseline = async () => {
+    setIsBaselineLoading(true);
+    setNotification(null);
+
+    let token = authToken;
+    if (!token && typeof window !== 'undefined') {
+      token = localStorage.getItem('cfo_auth_token') || '';
+    }
+
+    try {
+      const res = await fetch('http://localhost:8000/v1/finance/baseline/run', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ horizon_weeks: 26 }),
+      });
+
+      if (res.ok) {
+        const payload = await res.json();
+        setBaselineRunId(payload.run_id);
+        await fetchLiveBaseline(token);
+        setNotification('✓ Deterministic 26-Week Cash Forecast successfully recalculated from all ledger invoices and payroll items!');
+      } else {
+        const err = await res.json();
+        setNotification(`⚠ Ingestion warning: ${err.error?.message || 'Could not re-run baseline'}`);
+      }
+    } catch (err: any) {
+      setNotification(`⚠ Error running baseline: ${err.message}`);
+    } finally {
+      setIsBaselineLoading(false);
+    }
+  };
 
   // Enforce Light Theme & initialize demo auth token on mount
   useEffect(() => {
@@ -57,6 +132,7 @@ export const CfoDashboard: React.FC = () => {
           if (typeof window !== 'undefined') {
             localStorage.setItem('cfo_auth_token', data.access_token);
           }
+          await fetchLiveBaseline(data.access_token);
         }
       } catch (err) {
         console.warn('Backend token initialization deferred:', err);
@@ -164,7 +240,7 @@ export const CfoDashboard: React.FC = () => {
           Authorization: `Bearer ${tokenJson.access_token}`,
         },
         body: JSON.stringify({
-          baseline_run_id: '00000000-0000-0000-0000-000000000100',
+          baseline_run_id: baselineRunId || '00000000-0000-0000-0000-000000000100',
           horizon_weeks: 26,
           scenario: {
             name,
@@ -346,6 +422,21 @@ export const CfoDashboard: React.FC = () => {
               {theme === 'dark' ? '🌙 Dark' : theme === 'light' ? '☀️ Light' : '💻 System'}
             </button>
 
+            {/* Recalculate Baseline Trigger */}
+            <button
+              onClick={recalculateBaseline}
+              disabled={isBaselineLoading}
+              className="px-3.5 py-2 font-bold text-xs rounded-[var(--radius-control)] border transition-all duration-200 hover:scale-102 active:scale-98 inline-flex items-center space-x-1.5 shadow-xs glass-pill"
+              style={{
+                backgroundColor: 'var(--surface)',
+                borderColor: 'var(--ui-border)',
+                color: 'var(--text)',
+              }}
+              title="Re-run deterministic cash forecast schedule from all current ledger transactions and invoices"
+            >
+              <span>{isBaselineLoading ? '↻ Calculating...' : '↻ Recalculate Baseline'}</span>
+            </button>
+
             <button
               onClick={() => setIsUploadOpen(true)}
               className="px-4 py-2 font-bold text-xs rounded-[var(--radius-control)] shadow-md transition-all duration-200 hover:scale-102 active:scale-98 inline-flex items-center space-x-1.5"
@@ -359,6 +450,27 @@ export const CfoDashboard: React.FC = () => {
             </button>
           </div>
         </header>
+
+        {/* Dynamic Notification Banner */}
+        {notification && (
+          <div
+            className="p-3.5 rounded-[var(--radius-card)] border text-xs font-semibold flex justify-between items-center animate-reveal-1 shadow-sm"
+            style={{
+              backgroundColor: 'var(--status-verified-bg)',
+              borderColor: 'var(--status-verified)',
+              color: 'var(--status-verified)',
+            }}
+          >
+            <span>{notification}</span>
+            <button
+              onClick={() => setNotification(null)}
+              className="px-2 py-0.5 rounded opacity-75 hover:opacity-100"
+              style={{ color: 'var(--status-verified)' }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Sponsor Integration Banner: Zetaris */}
         <div className="glass-panel p-4 flex flex-wrap justify-between items-center gap-3 text-xs animate-reveal-2">
@@ -423,9 +535,16 @@ export const CfoDashboard: React.FC = () => {
         <div className="animate-reveal-4">
           <ForecastChart
             points={chartPoints}
-            baselinePoints={DEFAULT_BASELINE_POINTS}
-            minCashDate="1 Feb 2027"
-            onSelectPoint={() => setSelectedPointId('demo-point-uuid')}
+            baselinePoints={chartPoints}
+            minCashDate={baselineCase.min_cash ? `Min: $${baselineCase.min_cash}` : '1 Feb 2027'}
+            onSelectPoint={(ptId) => {
+              if (ptId) {
+                setSelectedPointId(ptId);
+              } else {
+                const targetPt = chartPoints.find((p) => p.point_id)?.point_id;
+                setSelectedPointId(targetPt || 'fa5f581b-bc01-4c47-b8d3-f994fdac7524');
+              }
+            }}
           />
         </div>
 
@@ -437,7 +556,10 @@ export const CfoDashboard: React.FC = () => {
             expected={expectedCase}
             worst={worstCase}
             best={bestCase}
-            onOpenEvidence={() => setSelectedPointId('demo-point-uuid')}
+            onOpenEvidence={() => {
+              const activePointId = chartPoints.find((p) => p.point_id)?.point_id;
+              setSelectedPointId(activePointId || 'fa5f581b-bc01-4c47-b8d3-f994fdac7524');
+            }}
           />
         </div>
 
@@ -457,7 +579,9 @@ export const CfoDashboard: React.FC = () => {
           isOpen={isUploadOpen}
           authToken={authToken}
           onClose={() => setIsUploadOpen(false)}
-          onSuccess={(rep) => console.log('Import finished:', rep)}
+          onSuccess={async (rep) => {
+            await recalculateBaseline();
+          }}
         />
 
         {/* Evidence Drawer */}
