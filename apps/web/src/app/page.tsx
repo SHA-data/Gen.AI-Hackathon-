@@ -192,7 +192,7 @@ export default function UnifiedSystemCockpit() {
         {/* Top Header Bar (Image 1 Style) */}
         <header className="flex items-center justify-between gap-4 py-1">
           {/* Page Title */}
-          <h1 className="text-2xl font-black text-slate-800 tracking-tight font-sans">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight font-sans">
             {activePart === "overview" && "Dashboard"}
             {activePart === "chat" && "Chat Co-Pilot"}
             {activePart === "cfo" && "CFO Finance Engine"}
@@ -207,7 +207,7 @@ export default function UnifiedSystemCockpit() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for scenarios, runway, models..."
-              className="w-full clay-card-inset py-2 pl-10 pr-4 text-xs text-slate-700 placeholder-slate-500 focus:outline-none transition-all font-sans"
+              className="w-full clay-card-inset py-2 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-500 focus:outline-none transition-all font-sans font-medium"
             />
           </div>
 
@@ -276,9 +276,9 @@ export default function UnifiedSystemCockpit() {
                 </div>
               </div>
 
-              {/* 4 Raised Clay Cushion Metric Cards (New Image 1 Cushions & Image 1 Dashboard) */}
+              {/* 4 Raised Clay Cushion Metric Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* Metric 1: Cash Runway (Sage Mint Cushion) */}
+                {/* Metric 1: Cash Runway */}
                 <div className="clay-cushion p-4 space-y-2">
                   <div className="w-10 h-10 clay-squircle flex items-center justify-center text-[#648283]">
                     <Music className="w-5 h-5" />
@@ -287,7 +287,7 @@ export default function UnifiedSystemCockpit() {
                     <div className="text-[11px] font-bold text-slate-500">
                       Cash Runway
                     </div>
-                    <div className="text-2xl font-black text-slate-800 tracking-tight font-sans">
+                    <div className="text-2xl font-black text-slate-900 tracking-tight font-sans">
                       18.4 w
                     </div>
                     <div className="text-[10px] font-bold text-[#648283] mt-0.5">
@@ -296,7 +296,7 @@ export default function UnifiedSystemCockpit() {
                   </div>
                 </div>
 
-                {/* Metric 2: Floor Reserve (Pastel Coral/Rose Cushion) */}
+                {/* Metric 2: Floor Reserve */}
                 <div className="clay-cushion p-4 space-y-2">
                   <div className="w-10 h-10 clay-squircle flex items-center justify-center text-[#cb7a72]">
                     <Heart className="w-5 h-5 fill-current" />
@@ -305,7 +305,7 @@ export default function UnifiedSystemCockpit() {
                     <div className="text-[11px] font-bold text-slate-500">
                       Floor Reserve
                     </div>
-                    <div className="text-2xl font-black text-slate-800 tracking-tight font-sans">
+                    <div className="text-2xl font-black text-slate-900 tracking-tight font-sans">
                       $143k
                     </div>
                     <div className="text-[10px] font-bold text-[#cb7a72] mt-0.5">
@@ -314,7 +314,7 @@ export default function UnifiedSystemCockpit() {
                   </div>
                 </div>
 
-                {/* Metric 3: Reversibility (Slate Teal Cushion) */}
+                {/* Metric 3: Reversibility */}
                 <div className="clay-cushion p-4 space-y-2">
                   <div className="w-10 h-10 clay-squircle flex items-center justify-center text-[#4c6b6c]">
                     <Clock className="w-5 h-5" />
@@ -323,7 +323,7 @@ export default function UnifiedSystemCockpit() {
                     <div className="text-[11px] font-bold text-slate-500">
                       Reversibility
                     </div>
-                    <div className="text-2xl font-black text-slate-800 tracking-tight font-sans">
+                    <div className="text-2xl font-black text-slate-900 tracking-tight font-sans">
                       &lt; $5k
                     </div>
                     <div className="text-[10px] font-bold text-emerald-700 mt-0.5">
@@ -332,7 +332,7 @@ export default function UnifiedSystemCockpit() {
                   </div>
                 </div>
 
-                {/* Metric 4: Proof Streak (Lavender Cushion) */}
+                {/* Metric 4: Proof Streak */}
                 <div className="clay-cushion p-4 space-y-2">
                   <div className="w-10 h-10 clay-squircle flex items-center justify-center text-[#8e7ca8]">
                     <Flame className="w-5 h-5 fill-current" />
@@ -341,7 +341,7 @@ export default function UnifiedSystemCockpit() {
                     <div className="text-[11px] font-bold text-slate-500">
                       Proof Streak
                     </div>
-                    <div className="text-2xl font-black text-slate-800 tracking-tight font-sans">
+                    <div className="text-2xl font-black text-slate-900 tracking-tight font-sans">
                       100%
                     </div>
                     <div className="text-[10px] font-bold text-[#8e7ca8] mt-0.5">
@@ -353,14 +353,14 @@ export default function UnifiedSystemCockpit() {
 
               {/* Middle Row: Runway Bar Chart + Donut Allocation Chart */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                {/* 26-Week Cash Runway Chart (Image 1's "Listening Overview") */}
+                {/* 26-Week Cash Runway Chart */}
                 <div className="lg:col-span-2 clay-card p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-extrabold text-slate-800 font-sans">
+                      <h3 className="text-sm font-extrabold text-slate-900 font-sans">
                         Runway Cash Overview
                       </h3>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-slate-600 font-medium">
                         26-week baseline vs scenario simulation
                       </p>
                     </div>
@@ -371,7 +371,7 @@ export default function UnifiedSystemCockpit() {
                     </div>
                   </div>
 
-                  {/* 3D Rounded Vertical Pillar Bars (Image 1 Style) */}
+                  {/* 3D Rounded Vertical Pillar Bars */}
                   <div className="h-44 flex items-end justify-between px-4 pt-6 pb-2 clay-card-inset">
                     {[
                       { label: "W1", height: "55%", color: "from-[#94af9f] to-[#648283]", val: "$185k" },
@@ -383,14 +383,14 @@ export default function UnifiedSystemCockpit() {
                       { label: "W7", height: "92%", color: "from-[#c5b8d8] to-[#806f97]", val: "$168k" },
                     ].map((bar, i) => (
                       <div key={i} className="flex flex-col items-center space-y-2 h-full justify-end group cursor-pointer">
-                        <span className="text-[9px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-[9px] font-bold text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
                           {bar.val}
                         </span>
                         <div
                           style={{ height: bar.height }}
                           className={`w-7 bg-gradient-to-t ${bar.color} clay-bar relative`}
                         />
-                        <span className="text-[10px] font-bold text-slate-600">
+                        <span className="text-[10px] font-bold text-slate-700">
                           {bar.label}
                         </span>
                       </div>
@@ -398,13 +398,13 @@ export default function UnifiedSystemCockpit() {
                   </div>
                 </div>
 
-                {/* Capital Allocation Donut Chart (Image 1's "Top Genres") */}
+                {/* Capital Allocation Donut Chart */}
                 <div className="clay-card p-5 space-y-3">
                   <div>
-                    <h3 className="text-sm font-extrabold text-slate-800 font-sans">
+                    <h3 className="text-sm font-extrabold text-slate-900 font-sans">
                       Capital Allocation
                     </h3>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-600 font-medium">
                       Portfolio resource distribution
                     </p>
                   </div>
@@ -451,55 +451,55 @@ export default function UnifiedSystemCockpit() {
                         />
                       </svg>
                       <div className="absolute flex flex-col items-center">
-                        <span className="text-sm font-black text-slate-800">45%</span>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase">Retainers</span>
+                        <span className="text-sm font-black text-slate-900">45%</span>
+                        <span className="text-[8px] font-bold text-slate-500 uppercase">Retainers</span>
                       </div>
                     </div>
 
                     {/* Legend */}
                     <div className="w-full mt-3 space-y-1.5 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center space-x-1.5 text-slate-600 font-medium">
+                        <span className="flex items-center space-x-1.5 text-slate-700 font-bold">
                           <span className="w-2.5 h-2.5 rounded-full bg-[#648283]" />
                           <span>Upfront Retainers</span>
                         </span>
-                        <span className="font-bold text-slate-800">45%</span>
+                        <span className="font-extrabold text-slate-900">45%</span>
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center space-x-1.5 text-slate-600 font-medium">
+                        <span className="flex items-center space-x-1.5 text-slate-700 font-bold">
                           <span className="w-2.5 h-2.5 rounded-full bg-[#94af9f]" />
                           <span>Dev Payroll</span>
                         </span>
-                        <span className="font-bold text-slate-800">25%</span>
+                        <span className="font-extrabold text-slate-900">25%</span>
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center space-x-1.5 text-slate-600 font-medium">
+                        <span className="flex items-center space-x-1.5 text-slate-700 font-bold">
                           <span className="w-2.5 h-2.5 rounded-full bg-[#c5b8d8]" />
                           <span>Prepay Float</span>
                         </span>
-                        <span className="font-bold text-slate-800">15%</span>
+                        <span className="font-extrabold text-slate-900">15%</span>
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center space-x-1.5 text-slate-600 font-medium">
+                        <span className="flex items-center space-x-1.5 text-slate-700 font-bold">
                           <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
                           <span>Working Buffer</span>
                         </span>
-                        <span className="font-bold text-slate-800">15%</span>
+                        <span className="font-extrabold text-slate-900">15%</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom Row: Recently Modeled + Clay UI Kit (New Image 2 Elements) */}
+              {/* Bottom Row: Recently Modeled + Clay UI Kit */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                {/* Recently Modeled Scenarios (Image 1's "Recently Played") */}
+                {/* Recently Modeled Scenarios */}
                 <div className="clay-card p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-extrabold text-slate-800 font-sans">
+                    <h3 className="text-sm font-extrabold text-slate-900 font-sans">
                       Recently Analyzed Levers
                     </h3>
                     <button
@@ -514,14 +514,14 @@ export default function UnifiedSystemCockpit() {
                     {/* Scenario 1 */}
                     <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/40 transition-colors">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#94af9f] flex items-center justify-center text-white shadow-sm font-bold text-xs">
+                        <div className="w-10 h-10 rounded-2xl bg-[#94af9f] flex items-center justify-center text-white shadow-sm font-bold text-xs">
                           UR
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-slate-800">
+                          <div className="text-xs font-bold text-slate-900">
                             Upfront Retainers
                           </div>
-                          <div className="text-[10px] text-slate-500">
+                          <div className="text-[10px] text-slate-600 font-medium">
                             Shift hourly billing to $15k/mo upfront
                           </div>
                         </div>
@@ -537,14 +537,14 @@ export default function UnifiedSystemCockpit() {
                     {/* Scenario 2 */}
                     <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/40 transition-colors">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#648283] flex items-center justify-center text-white shadow-sm font-bold text-xs">
+                        <div className="w-10 h-10 rounded-2xl bg-[#648283] flex items-center justify-center text-white shadow-sm font-bold text-xs">
                           HD
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-slate-800">
+                          <div className="text-xs font-bold text-slate-900">
                             Hire 2 Developers
                           </div>
-                          <div className="text-[10px] text-slate-500">
+                          <div className="text-[10px] text-slate-600 font-medium">
                             30-day delay + $14k monthly burn
                           </div>
                         </div>
@@ -560,14 +560,14 @@ export default function UnifiedSystemCockpit() {
                     {/* Scenario 3 */}
                     <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/40 transition-colors">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#c5b8d8] flex items-center justify-center text-[#3b2852] shadow-sm font-bold text-xs">
+                        <div className="w-10 h-10 rounded-2xl bg-[#c5b8d8] flex items-center justify-center text-[#3b2852] shadow-sm font-bold text-xs">
                           N15
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-slate-800">
+                          <div className="text-xs font-bold text-slate-900">
                             Net 15 Terms
                           </div>
-                          <div className="text-[10px] text-slate-500">
+                          <div className="text-[10px] text-slate-600 font-medium">
                             Accelerates client receivables by 15 days
                           </div>
                         </div>
@@ -582,7 +582,7 @@ export default function UnifiedSystemCockpit() {
                   </div>
                 </div>
 
-                {/* Tactile Clay UI Kit Interactive Playground (New Image 2 Style) */}
+                {/* Tactile Clay UI Kit Interactive Playground */}
                 <div className="clay-card p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-extrabold text-slate-900 font-sans tracking-wide">
@@ -592,23 +592,23 @@ export default function UnifiedSystemCockpit() {
                     <div className="clay-segmented-bar flex items-center space-x-1 text-[11px] font-bold">
                       <button
                         onClick={() => setActiveTab("hover")}
-                        className={`px-3 py-1 rounded-xl transition-all ${
-                          activeTab === "hover" ? "clay-pill-sage" : "text-slate-600 hover:text-slate-900"
+                        className={`px-3 py-1 rounded-full transition-all ${
+                          activeTab === "hover" ? "clay-pill-sage text-slate-900" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
                         Hover
                       </button>
                       <button
                         onClick={() => setActiveTab("completed")}
-                        className={`px-3 py-1 rounded-xl transition-all ${
-                          activeTab === "completed" ? "clay-pill-teal" : "text-slate-600 hover:text-slate-900"
+                        className={`px-3 py-1 rounded-full transition-all ${
+                          activeTab === "completed" ? "clay-pill-teal text-white" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
                         Complete
                       </button>
                       <button
                         onClick={() => setActiveTab("selected")}
-                        className={`px-3 py-1 rounded-xl transition-all ${
+                        className={`px-3 py-1 rounded-full transition-all ${
                           activeTab === "selected" ? "bg-white shadow text-slate-900" : "text-slate-600 hover:text-slate-900"
                         }`}
                       >
@@ -641,7 +641,7 @@ export default function UnifiedSystemCockpit() {
 
                   {/* Lavender Bordered Form Pill from Image 2 */}
                   <div className="clay-input-lavender px-4 py-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-700">
+                    <span className="text-xs font-bold text-slate-800">
                       Upfront Prepayment Acceptance
                     </span>
                     <span className="text-xs font-black text-[#648283] font-mono">
@@ -701,20 +701,8 @@ export default function UnifiedSystemCockpit() {
           {/* PART 1: CONVERSATIONAL CFO CO-PILOT VIEW                       */}
           {/* ============================================================== */}
           {activePart === "chat" && (
-            <div className="h-full flex flex-col clay-dark-card border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-2">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 text-xs text-slate-300 font-mono">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <strong className="text-white font-bold">[Part 1] Conversational CFO Co-Pilot</strong>
-                </div>
-                <div className="flex items-center space-x-3 text-[11px] text-slate-400">
-                  <span>SSE Streaming: Active</span>
-                  <span>Meterless Memory: Tracing</span>
-                </div>
-              </div>
-              <div className="flex-1 min-h-0">
-                <ChatView compact={false} />
-              </div>
+            <div className="h-full flex flex-col overflow-y-auto">
+              <ChatView compact={false} />
             </div>
           )}
 
@@ -722,20 +710,8 @@ export default function UnifiedSystemCockpit() {
           {/* PART 2: CFO FINANCE ENGINE MATRIX                              */}
           {/* ============================================================== */}
           {activePart === "cfo" && (
-            <div className="h-full flex flex-col clay-dark-card border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-2">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 text-xs text-slate-300 font-mono">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                  <strong className="text-white font-bold">[Part 2] CFO Finance Engine & Runway Matrix</strong>
-                </div>
-                <div className="flex items-center space-x-3 text-[11px] text-slate-400">
-                  <span>Zetaris Bridge: Federated</span>
-                  <span>Horizon: 26 Weeks</span>
-                </div>
-              </div>
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <CfoDashboard />
-              </div>
+            <div className="h-full flex flex-col overflow-y-auto pr-1">
+              <CfoDashboard />
             </div>
           )}
 
@@ -743,20 +719,8 @@ export default function UnifiedSystemCockpit() {
           {/* PART 3: MOONSHOT STRATEGIC REASONING STUDIO                    */}
           {/* ============================================================== */}
           {activePart === "moonshot" && (
-            <div className="h-full flex flex-col clay-dark-card border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-2">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 text-xs text-slate-300 font-mono">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                  <strong className="text-white font-bold">[Part 3] Moonshot 8-Stage Strategic Studio</strong>
-                </div>
-                <div className="flex items-center space-x-3 text-[11px] text-slate-400">
-                  <span>Verifier: HR-01 to HR-12 Enforced</span>
-                  <span>Proofs: 100% Deterministic</span>
-                </div>
-              </div>
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <MoonshotView />
-              </div>
+            <div className="h-full flex flex-col overflow-y-auto pr-1">
+              <MoonshotView />
             </div>
           )}
         </div>

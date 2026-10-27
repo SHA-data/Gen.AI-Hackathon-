@@ -1,4 +1,5 @@
 import React from 'react';
+import { Zap, CheckCircle2, ShieldCheck, AlertTriangle, Calculator } from 'lucide-react';
 
 export interface ComparisonCase {
   min_cash: string;
@@ -26,38 +27,24 @@ export const ScenarioComparison: React.FC<ScenarioComparisonProps> = ({
   onOpenEvidence,
 }) => {
   return (
-    <div className="glass-panel overflow-hidden font-[var(--font-ui)] transition-all">
-      {/* Frosted Header */}
-      <div
-        className="p-6 border-b flex flex-wrap justify-between items-center gap-4 bg-white/40 dark:bg-black/15 backdrop-blur-md"
-        style={{ borderColor: 'var(--divider)' }}
-      >
+    <div className="space-y-4 font-sans">
+      {/* Header */}
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span
-              className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-[var(--radius-chip)] inline-flex items-center space-x-1.5 glass-pill shadow-xs"
-              style={{
-                backgroundColor: 'var(--tag-computed-bg)',
-                color: 'var(--tag-computed)',
-              }}
-            >
-              <span>⚡</span>
+            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full clay-pill-sage inline-flex items-center space-x-1.5 shadow-xs">
+              <Zap className="w-3.5 h-3.5" />
               <span>Scenario Multi-Case Comparison</span>
             </span>
-            <span
-              className="text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-chip)] glass-pill"
-              style={{
-                backgroundColor: 'var(--status-verified-bg)',
-                color: 'var(--status-verified)',
-              }}
-            >
-              ✓ Deterministic Math
+            <span className="text-xs font-bold px-3 py-1 rounded-full clay-card-inset text-emerald-800 flex items-center space-x-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Deterministic Math</span>
             </span>
           </div>
-          <h2 className="text-xl font-bold mt-2 text-gradient-hero tracking-tight">
+          <h2 className="text-xl font-extrabold mt-1 text-slate-900 tracking-tight">
             {scenarioName}
           </h2>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs text-slate-600 font-semibold">
             Comparing immutable baseline against 3 discrete scenario simulation cases
           </p>
         </div>
@@ -65,218 +52,149 @@ export const ScenarioComparison: React.FC<ScenarioComparisonProps> = ({
         {onOpenEvidence && (
           <button
             onClick={onOpenEvidence}
-            className="px-4 py-2 text-xs font-bold rounded-[var(--radius-control)] shadow-md transition-all duration-200 hover:scale-102 active:scale-98 inline-flex items-center space-x-1.5"
-            style={{
-              background: 'var(--primary-gradient)',
-              color: 'var(--on-primary)',
-            }}
+            className="clay-pill-sage px-4 py-2 text-xs font-bold rounded-full shadow-md transition-transform hover:-translate-y-0.5 inline-flex items-center space-x-1.5 text-slate-900"
           >
-            <span>🧮</span>
+            <Calculator className="w-3.5 h-3.5" />
             <span>Open Evidence Drawer</span>
           </button>
         )}
       </div>
 
-      {/* Table with Frosted Sheen */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead
-            className="uppercase text-xs font-bold tracking-wider"
-            style={{
-              backgroundColor: 'rgba(244, 247, 250, 0.7)',
-              color: 'var(--muted)',
-            }}
-          >
-            <tr className="border-b" style={{ borderColor: 'var(--divider)' }}>
-              <th className="py-3.5 px-5">Financial Metric</th>
-              <th className="py-3.5 px-5">Immutable Baseline</th>
-              <th className="py-3.5 px-5">Expected Case</th>
-              <th className="py-3.5 px-5">Worst Case (+14d Delay)</th>
-              <th className="py-3.5 px-5">Best Case (-7d Advance)</th>
+      {/* Table with Soft Clay Inset Styling */}
+      <div className="clay-card-inset p-3 rounded-3xl overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead className="uppercase text-[11px] font-extrabold tracking-wider text-slate-600 border-b border-slate-300">
+            <tr>
+              <th className="py-3 px-4">Financial Metric</th>
+              <th className="py-3 px-4">Immutable Baseline</th>
+              <th className="py-3 px-4 text-[#648283]">Expected Case</th>
+              <th className="py-3 px-4 text-rose-700">Worst Case (+14d Delay)</th>
+              <th className="py-3 px-4 text-emerald-700">Best Case (-7d Advance)</th>
             </tr>
           </thead>
-          <tbody
-            className="divide-y font-[var(--font-mono)] tabular-nums"
-            style={{ borderColor: 'var(--divider)' }}
-          >
+          <tbody className="divide-y divide-slate-300 font-mono font-bold">
             {/* Minimum Cash Balance Row */}
-            <tr
-              className="hover:bg-teal-500/[0.04] dark:hover:bg-teal-400/[0.06] transition-colors duration-150"
-              style={{ borderTopColor: 'var(--divider)' }}
-            >
-              <td className="py-3.5 px-5 font-[var(--font-ui)] font-semibold" style={{ color: 'var(--text)' }}>
+            <tr className="hover:bg-white/40 transition-colors">
+              <td className="py-3.5 px-4 font-sans font-extrabold text-slate-900">
                 Minimum Projected Cash
               </td>
-              <td className="py-3.5 px-5" style={{ color: 'var(--text)' }}>
+              <td className="py-3.5 px-4 text-slate-800">
                 ${parseFloat(baseline.min_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-3.5 px-5 font-bold text-gradient-amber">
+              <td className="py-3.5 px-4 text-[#648283] font-black">
                 ${parseFloat(expected.min_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-3.5 px-5 font-bold" style={{ color: 'var(--status-failed)' }}>
+              <td className="py-3.5 px-4 text-rose-700 font-black">
                 ${parseFloat(worst.min_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-3.5 px-5 font-bold" style={{ color: 'var(--status-verified)' }}>
+              <td className="py-3.5 px-4 text-emerald-700 font-black">
                 ${parseFloat(best.min_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
             </tr>
 
             {/* Ending Cash Balance Row */}
-            <tr className="hover:bg-teal-500/[0.04] dark:hover:bg-teal-400/[0.06] transition-colors duration-150">
-              <td className="py-3.5 px-5 font-[var(--font-ui)] font-semibold" style={{ color: 'var(--text)' }}>
+            <tr className="hover:bg-white/40 transition-colors">
+              <td className="py-3.5 px-4 font-sans font-extrabold text-slate-900">
                 Ending Cash (Week 26)
               </td>
-              <td className="py-3.5 px-5" style={{ color: 'var(--text)' }}>
+              <td className="py-3.5 px-4 text-slate-800">
                 ${parseFloat(baseline.end_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-3.5 px-5 font-semibold" style={{ color: 'var(--text)' }}>
+              <td className="py-3.5 px-4 text-slate-900">
                 ${parseFloat(expected.end_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-3.5 px-5" style={{ color: 'var(--status-failed)' }}>
+              <td className="py-3.5 px-4 text-rose-700 font-black">
                 ${parseFloat(worst.end_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
-              <td className="py-3.5 px-5" style={{ color: 'var(--status-verified)' }}>
+              <td className="py-3.5 px-4 text-emerald-700 font-black">
                 ${parseFloat(best.end_cash).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </td>
             </tr>
 
             {/* Runway Weeks Row */}
-            <tr className="hover:bg-teal-500/[0.04] dark:hover:bg-teal-400/[0.06] transition-colors duration-150">
-              <td className="py-3.5 px-5 font-[var(--font-ui)] font-semibold" style={{ color: 'var(--text)' }}>
+            <tr className="hover:bg-white/40 transition-colors">
+              <td className="py-3.5 px-4 font-sans font-extrabold text-slate-900">
                 Projected Runway (Weeks)
               </td>
-              <td className="py-3.5 px-5" style={{ color: 'var(--muted)' }}>
-                {baseline.runway_weeks !== null ? `${baseline.runway_weeks} wks` : '> 26 wks (Unbounded)'}
+              <td className="py-3.5 px-4 text-slate-600">
+                {baseline.runway_weeks !== null ? `${baseline.runway_weeks} wks` : '> 26 wks (Solvent)'}
               </td>
-              <td className="py-3.5 px-5 font-semibold" style={{ color: 'var(--text)' }}>
+              <td className="py-3.5 px-4">
                 {expected.runway_weeks !== null ? (
-                  <span className="px-2 py-0.5 rounded text-xs font-bold glass-pill bg-amber-500/15 text-amber-800 dark:text-amber-300">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-200 text-amber-900">
                     {expected.runway_weeks} wks
                   </span>
                 ) : (
-                  '> 26 wks'
+                  <span className="text-emerald-800 font-black">&gt; 26 wks</span>
                 )}
               </td>
-              <td className="py-3.5 px-5" style={{ color: 'var(--status-failed)' }}>
+              <td className="py-3.5 px-4">
                 {worst.runway_weeks !== null ? (
-                  <span className="px-2 py-0.5 rounded text-xs font-bold glass-pill" style={{ backgroundColor: 'var(--status-failed-bg)', color: 'var(--status-failed)' }}>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-200 text-rose-900">
                     {worst.runway_weeks} wks
                   </span>
                 ) : (
-                  '> 26 wks'
+                  <span className="text-slate-800 font-black">&gt; 26 wks</span>
                 )}
               </td>
-              <td className="py-3.5 px-5 font-semibold" style={{ color: 'var(--status-verified)' }}>
+              <td className="py-3.5 px-4 text-emerald-700 font-black">
                 {best.runway_weeks !== null ? `${best.runway_weeks} wks` : '> 26 wks'}
               </td>
             </tr>
 
             {/* 12-Week Cash Floor Policy Breach */}
-            <tr className="hover:bg-teal-500/[0.04] dark:hover:bg-teal-400/[0.06] transition-colors duration-150">
-              <td className="py-3.5 px-5 font-[var(--font-ui)] font-semibold" style={{ color: 'var(--text)' }}>
+            <tr className="hover:bg-white/40 transition-colors">
+              <td className="py-3.5 px-4 font-sans font-extrabold text-slate-900">
                 12-Week Floor Breached?
               </td>
-              <td className="py-3.5 px-5">
+              <td className="py-3.5 px-4">
                 <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: baseline.cash_floor_breach ? 'var(--status-warning-bg)' : 'var(--status-verified-bg)',
-                    color: baseline.cash_floor_breach ? 'var(--status-warning)' : 'var(--status-verified)',
-                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 ${
+                    baseline.cash_floor_breach ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
+                  }`}
                 >
-                  <span>{baseline.cash_floor_breach ? '⚠' : '✓'}</span>
-                  <span>{baseline.cash_floor_breach ? 'Breached' : 'Maintained'}</span>
+                  {baseline.cash_floor_breach ? (
+                    <>
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Breached</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Maintained</span>
+                    </>
+                  )}
                 </span>
               </td>
-              <td className="py-3.5 px-5">
+              <td className="py-3.5 px-4">
                 <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: expected.cash_floor_breach ? 'var(--status-warning-bg)' : 'var(--status-verified-bg)',
-                    color: expected.cash_floor_breach ? 'var(--status-warning)' : 'var(--status-verified)',
-                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 ${
+                    expected.cash_floor_breach ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'
+                  }`}
                 >
-                  <span>{expected.cash_floor_breach ? '⚠' : '✓'}</span>
-                  <span>{expected.cash_floor_breach ? 'Breached' : 'Maintained'}</span>
+                  {expected.cash_floor_breach ? (
+                    <>
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Breached</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Maintained</span>
+                    </>
+                  )}
                 </span>
               </td>
-              <td className="py-3.5 px-5">
-                <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: worst.cash_floor_breach ? 'var(--status-warning-bg)' : 'var(--status-verified-bg)',
-                    color: worst.cash_floor_breach ? 'var(--status-warning)' : 'var(--status-verified)',
-                  }}
-                >
-                  <span>{worst.cash_floor_breach ? '⚠' : '✓'}</span>
-                  <span>{worst.cash_floor_breach ? 'Breached' : 'Maintained'}</span>
+              <td className="py-3.5 px-4">
+                <span className="px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 bg-rose-100 text-rose-900">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Breached</span>
                 </span>
               </td>
-              <td className="py-3.5 px-5">
-                <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: best.cash_floor_breach ? 'var(--status-warning-bg)' : 'var(--status-verified-bg)',
-                    color: best.cash_floor_breach ? 'var(--status-warning)' : 'var(--status-verified)',
-                  }}
-                >
-                  <span>{best.cash_floor_breach ? '⚠' : '✓'}</span>
-                  <span>{best.cash_floor_breach ? 'Breached' : 'Maintained'}</span>
-                </span>
-              </td>
-            </tr>
-
-            {/* Hard Reserve ($50k) Breach */}
-            <tr className="hover:bg-teal-500/[0.04] dark:hover:bg-teal-400/[0.06] transition-colors duration-150">
-              <td className="py-3.5 px-5 font-[var(--font-ui)] font-semibold" style={{ color: 'var(--text)' }}>
-                Hard Reserve ($50k) Breached?
-              </td>
-              <td className="py-3.5 px-5">
-                <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: baseline.reserve_breach ? 'var(--status-failed-bg)' : 'var(--status-verified-bg)',
-                    color: baseline.reserve_breach ? 'var(--status-failed)' : 'var(--status-verified)',
-                  }}
-                >
-                  <span>{baseline.reserve_breach ? '✕' : '✓'}</span>
-                  <span>{baseline.reserve_breach ? 'Breached' : 'Protected'}</span>
-                </span>
-              </td>
-              <td className="py-3.5 px-5">
-                <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: expected.reserve_breach ? 'var(--status-failed-bg)' : 'var(--status-verified-bg)',
-                    color: expected.reserve_breach ? 'var(--status-failed)' : 'var(--status-verified)',
-                  }}
-                >
-                  <span>{expected.reserve_breach ? '✕' : '✓'}</span>
-                  <span>{expected.reserve_breach ? 'Breached' : 'Protected'}</span>
-                </span>
-              </td>
-              <td className="py-3.5 px-5">
-                <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: worst.reserve_breach ? 'var(--status-failed-bg)' : 'var(--status-verified-bg)',
-                    color: worst.reserve_breach ? 'var(--status-failed)' : 'var(--status-verified)',
-                  }}
-                >
-                  <span>{worst.reserve_breach ? '✕' : '✓'}</span>
-                  <span>{worst.reserve_breach ? 'Breached' : 'Protected'}</span>
-                </span>
-              </td>
-              <td className="py-3.5 px-5">
-                <span
-                  className="px-2.5 py-0.5 rounded-[var(--radius-chip)] text-xs font-bold glass-pill inline-flex items-center space-x-1"
-                  style={{
-                    backgroundColor: best.reserve_breach ? 'var(--status-failed-bg)' : 'var(--status-verified-bg)',
-                    color: best.reserve_breach ? 'var(--status-failed)' : 'var(--status-verified)',
-                  }}
-                >
-                  <span>{best.reserve_breach ? '✕' : '✓'}</span>
-                  <span>{best.reserve_breach ? 'Breached' : 'Protected'}</span>
+              <td className="py-3.5 px-4">
+                <span className="px-3 py-1 rounded-full text-xs font-bold inline-flex items-center space-x-1 bg-emerald-100 text-emerald-900">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Maintained</span>
                 </span>
               </td>
             </tr>

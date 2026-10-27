@@ -10,6 +10,38 @@
   --clay-slate-teal: #648283;
   --clay-lavender: #c4b6d6;
   --clay-coral: #cb7a72;
+
+  /* Theme Tokens for Complete Visual Visibility & Contrast */
+  --font-ui: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --text: #0f172a;
+  --muted: #475569;
+  --surface: #ede9e2;
+  --ui-border: rgba(255, 255, 255, 0.85);
+  --divider: #cbd5e1;
+  --bg-gradient: transparent;
+
+  /* Status Tokens */
+  --status-verified: #065f46;
+  --status-verified-bg: #d1fae5;
+  --status-warning: #92400e;
+  --status-warning-bg: #fef3c7;
+  --status-unverified: #475569;
+  --status-unverified-bg: #e2e8f0;
+
+  /* Tag Tokens */
+  --tag-computed: #0f766e;
+  --tag-computed-bg: #ccfbf1;
+  --tag-cited: #1e40af;
+  --tag-cited-bg: #dbeafe;
+  --tag-inferred: #4338ca;
+  --tag-inferred-bg: #e0e7ff;
+
+  --primary-gradient: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  --on-primary: #ffffff;
+  --radius-card: 1.5rem;
+  --radius-control: 9999px;
+  --radius-chip: 9999px;
 }
 
 /* Hide default scrollbars for an ultra-clean mobile-app/tactile look */
@@ -43,7 +75,7 @@ body {
 .clay-cushion {
   background: #edeae3;
   box-shadow: 14px 14px 28px #c8c4bc, -10px -10px 24px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 1.75rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -56,14 +88,14 @@ body {
 .clay-card {
   background: #ede9e2;
   box-shadow: 12px 12px 24px #cbcfd8, -10px -10px 22px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 1.5rem;
 }
 
 .clay-card-sm {
   background: #eeeae4;
   box-shadow: 7px 7px 16px #cac6be, -7px -7px 16px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 1.25rem;
 }
 
@@ -85,7 +117,7 @@ body {
 .clay-btn {
   background: #eeeae4;
   box-shadow: 6px 6px 14px #cac6be, -5px -5px 12px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 9999px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -104,7 +136,7 @@ body {
 .clay-pill-sage {
   background: #94af9f;
   box-shadow: 6px 6px 14px #b8c7bd, -4px -4px 10px #ffffff, inset 0 1px 2px rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 9999px;
   color: #14281e;
   font-weight: 700;
@@ -117,11 +149,11 @@ body {
   box-shadow: 8px 8px 18px #aab9af, -5px -5px 12px #ffffff;
 }
 
-/* Slate Teal Pill Button from Image 2 ("Pressed" or "Elevation") */
+/* Slate Teal Pill Button from Image 2 */
 .clay-pill-teal {
   background: #648283;
-  box-shadow: 6px 6px 14px #9aaeb0, -4px -4px 10px #ffffff, inset 0 1px 2px rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 6px 6px 14px #9aaeb0, -4px -4px 10px #ffffff, inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 9999px;
   color: #ffffff;
   font-weight: 700;
@@ -133,7 +165,7 @@ body {
   background: #6e8e8f;
 }
 
-/* Lavender Pill Button from Image 2 ("Hover" or Accent) */
+/* Lavender Pill Button from Image 2 */
 .clay-pill-lavender {
   background: #c5b8d8;
   box-shadow: 6px 6px 14px #b8accc, -4px -4px 10px #ffffff, inset 0 1px 2px rgba(255, 255, 255, 0.5);
@@ -201,7 +233,7 @@ body {
   background: #182439;
   box-shadow: 10px 10px 24px rgba(10, 16, 28, 0.45), -6px -6px 16px rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.5rem;
+  border-radius: 1.75rem;
 }
 
 /* ========================================================================= */

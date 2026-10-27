@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Zap, ShieldCheck, AlertTriangle, Play, RefreshCw, Check, CheckCircle2 } from 'lucide-react';
 
 export interface ScenarioChangePayload {
   lever: string;
@@ -106,7 +107,7 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
       });
     }
 
-    if (lostClientActive && lostClientName) {
+    if (lostClientActive && lostClientName.trim()) {
       list.push({
         lever: 'lost_client',
         op: 'set',
@@ -119,7 +120,7 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
 
     if (priceActive && priceChangePct !== 0) {
       list.push({
-        lever: 'price_change_pct',
+        lever: 'price_change',
         op: 'set',
         value: priceChangePct,
         start_date: '2026-11-01',
@@ -130,7 +131,7 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
 
     if (revActive && revChangePct !== 0) {
       list.push({
-        lever: 'revenue_change_pct',
+        lever: 'revenue_change',
         op: 'set',
         value: revChangePct,
         start_date: '2026-11-01',
@@ -145,7 +146,10 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
         op: 'set',
         value: expenseAmt,
         start_date: '2026-11-01',
-        params: { cadence: expenseCadence },
+        params: {
+          amount: expenseAmt,
+          cadence: expenseCadence,
+        },
         is_assumption: true,
       });
     }
@@ -250,99 +254,59 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
   }, [hireActive, hireCount, hireMonthlyCost, expenseActive, expenseAmt, expenseCadence]);
 
   return (
-    <div className="glass-panel overflow-hidden font-[var(--font-ui)] transition-all">
+    <div className="space-y-4 font-sans">
       {/* Header with Title and Preset Pills */}
-      <div
-        className="p-5 border-b flex flex-wrap justify-between items-center gap-3 bg-white/40 dark:bg-black/15 backdrop-blur-md"
-        style={{ borderColor: 'var(--divider)' }}
-      >
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
           <div className="flex items-center space-x-2">
-            <span
-              className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-[var(--radius-chip)] inline-flex items-center space-x-1.5 glass-pill shadow-xs"
-              style={{
-                backgroundColor: 'var(--tag-computed-bg)',
-                color: 'var(--tag-computed)',
-              }}
-            >
-              <span>⚡</span>
+            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full clay-pill-sage inline-flex items-center space-x-1.5 shadow-xs">
+              <Zap className="w-3.5 h-3.5" />
               <span>Sensitivity Studio</span>
             </span>
-            <span
-              className="text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-chip)] font-[var(--font-mono)] glass-pill"
-              style={{
-                backgroundColor:
-                  activeChanges.length > 0
-                    ? 'var(--status-warning-bg)'
-                    : 'var(--status-unverified-bg)',
-                color:
-                  activeChanges.length > 0
-                    ? 'var(--status-warning)'
-                    : 'var(--status-unverified)',
-              }}
-            >
+            <span className="text-xs font-bold px-3 py-1 rounded-full clay-card-inset text-slate-800 font-mono">
               {activeChanges.length} Lever{activeChanges.length === 1 ? '' : 's'} Active
             </span>
           </div>
-          <h2 className="text-lg font-bold mt-1 tracking-tight text-gradient-hero">
+          <h2 className="text-lg font-extrabold mt-1 text-slate-900 tracking-tight">
             Interactive What-If Scenario Levers
           </h2>
-          <p className="text-xs" style={{ color: 'var(--muted)' }}>
+          <p className="text-xs text-slate-600 font-semibold">
             Adjust parameters to project cash runway deltas against the immutable baseline.
           </p>
         </div>
 
         {/* Quick Presets */}
         <div className="flex items-center flex-wrap gap-2 text-xs">
-          <span className="font-medium text-[11px] uppercase tracking-wider" style={{ color: 'var(--muted)' }}>
-            Presets:
-          </span>
+          <span className="font-bold text-slate-500">Presets:</span>
           <button
             type="button"
             onClick={() => applyPreset('golden')}
-            className="px-3 py-1 rounded-[var(--radius-chip)] border font-semibold transition-all duration-200 glass-pill hover:scale-102 active:scale-98 shadow-xs"
-            style={{
-              backgroundColor: 'var(--tag-inferred-bg)',
-              color: 'var(--tag-inferred)',
-              borderColor: 'var(--tag-inferred)',
-            }}
+            className="clay-btn px-3.5 py-1.5 rounded-full font-bold text-slate-800 flex items-center space-x-1"
           >
-            ★ Golden Demo (2 Devs + 30d Delay)
+            <Check className="w-3.5 h-3.5 text-[#648283]" />
+            <span>Golden Demo (2 Devs + 30d Delay)</span>
           </button>
           <button
             type="button"
             onClick={() => applyPreset('cash_shield')}
-            className="px-3 py-1 rounded-[var(--radius-chip)] border font-semibold transition-all duration-200 glass-pill hover:scale-102 active:scale-98 shadow-xs"
-            style={{
-              backgroundColor: 'var(--status-verified-bg)',
-              color: 'var(--status-verified)',
-              borderColor: 'var(--status-verified)',
-            }}
+            className="clay-btn px-3.5 py-1.5 rounded-full font-bold text-slate-800 flex items-center space-x-1"
           >
-            🛡 Cash Shield (+25% Deposit)
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Cash Shield (+25% Deposit)</span>
           </button>
           <button
             type="button"
             onClick={() => applyPreset('stress_test')}
-            className="px-3 py-1 rounded-[var(--radius-chip)] border font-semibold transition-all duration-200 glass-pill hover:scale-102 active:scale-98 shadow-xs"
-            style={{
-              backgroundColor: 'var(--status-failed-bg)',
-              color: 'var(--status-failed)',
-              borderColor: 'var(--status-failed)',
-            }}
+            className="clay-btn px-3.5 py-1.5 rounded-full font-bold text-slate-800 flex items-center space-x-1"
           >
-            ⚠ Black Swan (Lost Apex)
+            <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
+            <span>Black Swan (Lost Apex)</span>
           </button>
           {activeChanges.length > 0 && (
             <button
               type="button"
               onClick={() => applyPreset('clear')}
-              className="px-2.5 py-1 rounded-[var(--radius-chip)] border font-medium transition-all duration-200 glass-pill hover:scale-102 active:scale-98"
-              style={{
-                backgroundColor: 'var(--surface)',
-                borderColor: 'var(--ui-border)',
-                color: 'var(--muted)',
-              }}
+              className="clay-btn px-3 py-1 rounded-full font-bold text-slate-600 hover:text-slate-900"
             >
               Reset All
             </button>
@@ -350,21 +314,15 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div
-        className="flex border-b text-xs font-semibold px-4 pt-2 gap-4"
-        style={{
-          borderColor: 'var(--divider)',
-          backgroundColor: 'var(--surface)',
-        }}
-      >
+      {/* Category Tabs (Segmented Tab Bar from Image 2) */}
+      <div className="clay-segmented-bar flex items-center space-x-1 text-xs font-bold">
         <button
           type="button"
           onClick={() => setActiveTab('talent_ops')}
-          className={`pb-2.5 px-2 border-b-2 transition ${
+          className={`px-4 py-2 rounded-full transition-all flex-1 text-center ${
             activeTab === 'talent_ops'
-              ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
-              : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+              ? 'clay-pill-sage text-slate-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           1. Headcount & Direct Outflows
@@ -372,10 +330,10 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('revenue_clients')}
-          className={`pb-2.5 px-2 border-b-2 transition ${
+          className={`px-4 py-2 rounded-full transition-all flex-1 text-center ${
             activeTab === 'revenue_clients'
-              ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
-              : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+              ? 'clay-pill-teal text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           2. Client Delays & Churn Risk
@@ -383,10 +341,10 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('terms_cash')}
-          className={`pb-2.5 px-2 border-b-2 transition ${
+          className={`px-4 py-2 rounded-full transition-all flex-1 text-center ${
             activeTab === 'terms_cash'
-              ? 'border-[var(--primary)] text-[var(--primary)] font-bold'
-              : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+              ? 'clay-pill-lavender text-slate-900 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           3. Payment Terms, Deposits & Pricing
@@ -394,41 +352,27 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
       </div>
 
       {/* Main Lever Configuration Body */}
-      <div className="p-6">
+      <div className="pt-2">
         {/* Tab 1: Talent & Direct Outflows */}
         {activeTab === 'talent_ops' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Lever: Hire Developers */}
-            <div
-              className={`p-4 rounded-[var(--radius-control)] border transition-all ${
-                hireActive ? 'ring-1' : 'opacity-85'
-              }`}
-              style={{
-                backgroundColor: 'var(--bg)',
-                borderColor: hireActive ? 'var(--primary)' : 'var(--divider)',
-              }}
-            >
-              <div className="flex justify-between items-center mb-3">
+            <div className={`clay-cushion p-5 rounded-3xl space-y-3 ${hireActive ? 'ring-2 ring-[#648283]' : 'opacity-80'}`}>
+              <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="lever-hire-toggle"
                     checked={hireActive}
                     onChange={(e) => setHireActive(e.target.checked)}
-                    className="w-4 h-4 rounded cursor-pointer accent-[var(--primary)]"
+                    className="w-4 h-4 rounded cursor-pointer accent-[#648283]"
                   />
-                  <label htmlFor="lever-hire-toggle" className="text-xs font-bold uppercase tracking-wider cursor-pointer" style={{ color: 'var(--text)' }}>
+                  <label htmlFor="lever-hire-toggle" className="text-xs font-extrabold uppercase tracking-wide text-slate-900 cursor-pointer">
                     Lever: Hire Staff (`hire`)
                   </label>
                 </div>
                 {hireActive && (
-                  <span
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-[var(--radius-chip)] font-bold"
-                    style={{
-                      backgroundColor: 'var(--status-warning-bg)',
-                      color: 'var(--status-warning)',
-                    }}
-                  >
+                  <span className="clay-card-inset text-[11px] font-mono font-black text-rose-700 px-3 py-1 rounded-full">
                     -${(hireCount * hireMonthlyCost).toLocaleString()}/mo
                   </span>
                 )}
@@ -437,23 +381,18 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
               <div className="space-y-4">
                 {/* Stepper for Count */}
                 <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span style={{ color: 'var(--muted)' }}>New Full-Time Roles:</span>
-                    <span className="font-bold font-mono" style={{ color: 'var(--text)' }}>
+                  <div className="flex justify-between text-xs mb-1.5 font-bold text-slate-700">
+                    <span>New Full-Time Roles:</span>
+                    <span className="font-mono text-slate-900 font-black">
                       {hireCount} Staff
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     <button
                       type="button"
                       disabled={!hireActive || hireCount <= 0}
                       onClick={() => setHireCount((c) => Math.max(0, c - 1))}
-                      className="px-3 py-1.5 rounded-[var(--radius-control)] border text-sm font-bold transition disabled:opacity-40"
-                      style={{
-                        backgroundColor: 'var(--surface)',
-                        borderColor: 'var(--ui-border)',
-                        color: 'var(--text)',
-                      }}
+                      className="clay-btn w-8 h-8 rounded-full text-base font-bold flex items-center justify-center disabled:opacity-40"
                     >
                       -
                     </button>
@@ -464,18 +403,13 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
                       disabled={!hireActive}
                       value={hireCount}
                       onChange={(e) => setHireCount(parseInt(e.target.value) || 0)}
-                      className="w-full accent-[var(--primary)] cursor-pointer disabled:opacity-40"
+                      className="w-full accent-[#648283] cursor-pointer disabled:opacity-40"
                     />
                     <button
                       type="button"
                       disabled={!hireActive || hireCount >= 10}
                       onClick={() => setHireCount((c) => c + 1)}
-                      className="px-3 py-1.5 rounded-[var(--radius-control)] border text-sm font-bold transition disabled:opacity-40"
-                      style={{
-                        backgroundColor: 'var(--surface)',
-                        borderColor: 'var(--ui-border)',
-                        color: 'var(--text)',
-                      }}
+                      className="clay-btn w-8 h-8 rounded-full text-base font-bold flex items-center justify-center disabled:opacity-40"
                     >
                       +
                     </button>
@@ -484,9 +418,9 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
 
                 {/* Monthly Cost per Head */}
                 <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span style={{ color: 'var(--muted)' }}>Cost Per Head (Monthly):</span>
-                    <span className="font-bold font-mono" style={{ color: 'var(--text)' }}>
+                  <div className="flex justify-between text-xs mb-1 font-bold text-slate-700">
+                    <span>Cost Per Head (Monthly):</span>
+                    <span className="font-mono text-slate-900 font-black">
                       ${hireMonthlyCost.toLocaleString()} / mo
                     </span>
                   </div>
@@ -498,9 +432,9 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
                     disabled={!hireActive}
                     value={hireMonthlyCost}
                     onChange={(e) => setHireMonthlyCost(parseInt(e.target.value) || 0)}
-                    className="w-full accent-[var(--primary)] cursor-pointer disabled:opacity-40"
+                    className="w-full accent-[#648283] cursor-pointer disabled:opacity-40"
                   />
-                  <div className="flex justify-between text-[11px] font-mono mt-1" style={{ color: 'var(--muted)' }}>
+                  <div className="flex justify-between text-[10px] font-mono text-slate-500 font-bold mt-1">
                     <span>$4,000 (Junior)</span>
                     <span>$7,000 (Mid)</span>
                     <span>$15,000 (Lead)</span>
@@ -510,46 +444,32 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
             </div>
 
             {/* Lever: Expense Change */}
-            <div
-              className={`p-4 rounded-[var(--radius-control)] border transition-all ${
-                expenseActive ? 'ring-1' : 'opacity-85'
-              }`}
-              style={{
-                backgroundColor: 'var(--bg)',
-                borderColor: expenseActive ? 'var(--primary)' : 'var(--divider)',
-              }}
-            >
-              <div className="flex justify-between items-center mb-3">
+            <div className={`clay-cushion p-5 rounded-3xl space-y-3 ${expenseActive ? 'ring-2 ring-[#648283]' : 'opacity-80'}`}>
+              <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="lever-expense-toggle"
                     checked={expenseActive}
                     onChange={(e) => setExpenseActive(e.target.checked)}
-                    className="w-4 h-4 rounded cursor-pointer accent-[var(--primary)]"
+                    className="w-4 h-4 rounded cursor-pointer accent-[#648283]"
                   />
-                  <label htmlFor="lever-expense-toggle" className="text-xs font-bold uppercase tracking-wider cursor-pointer" style={{ color: 'var(--text)' }}>
-                    Lever: OpEx Delta (`expense_change`)
+                  <label htmlFor="lever-expense-toggle" className="text-xs font-extrabold uppercase tracking-wide text-slate-900 cursor-pointer">
+                    Lever: Opex Delta (`expense_change`)
                   </label>
                 </div>
                 {expenseActive && (
-                  <span
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-[var(--radius-chip)] font-bold"
-                    style={{
-                      backgroundColor: 'var(--tag-computed-bg)',
-                      color: 'var(--tag-computed)',
-                    }}
-                  >
-                    -${expenseAmt.toLocaleString()} ({expenseCadence})
+                  <span className="clay-card-inset text-[11px] font-mono font-black text-rose-700 px-3 py-1 rounded-full">
+                    -${expenseAmt.toLocaleString()}
                   </span>
                 )}
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span style={{ color: 'var(--muted)' }}>Expense Amount:</span>
-                    <span className="font-bold font-mono" style={{ color: 'var(--text)' }}>
+                  <div className="flex justify-between text-xs mb-1.5 font-bold text-slate-700">
+                    <span>Expense Amount:</span>
+                    <span className="font-mono text-slate-900 font-black">
                       ${expenseAmt.toLocaleString()}
                     </span>
                   </div>
@@ -561,234 +481,140 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
                     disabled={!expenseActive}
                     value={expenseAmt}
                     onChange={(e) => setExpenseAmt(parseInt(e.target.value) || 0)}
-                    className="w-full accent-[var(--primary)] cursor-pointer disabled:opacity-40"
+                    className="w-full accent-[#648283] cursor-pointer disabled:opacity-40"
                   />
                 </div>
 
-                <div>
-                  <span className="text-xs block mb-1" style={{ color: 'var(--muted)' }}>
-                    Cadence:
-                  </span>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <button
-                      type="button"
-                      disabled={!expenseActive}
-                      onClick={() => setExpenseCadence('monthly')}
-                      className={`py-1.5 rounded-[var(--radius-control)] border font-semibold transition ${
-                        expenseCadence === 'monthly'
-                          ? 'border-[var(--primary)] bg-[var(--surface)] text-[var(--primary)] shadow-sm'
-                          : 'border-[var(--divider)] opacity-60'
-                      }`}
-                    >
-                      Monthly Recurring
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!expenseActive}
-                      onClick={() => setExpenseCadence('one-off')}
-                      className={`py-1.5 rounded-[var(--radius-control)] border font-semibold transition ${
-                        expenseCadence === 'one-off'
-                          ? 'border-[var(--primary)] bg-[var(--surface)] text-[var(--primary)] shadow-sm'
-                          : 'border-[var(--divider)] opacity-60'
-                      }`}
-                    >
-                      One-off Capital Outlay
-                    </button>
-                  </div>
+                <div className="flex items-center space-x-2 pt-1">
+                  <button
+                    type="button"
+                    disabled={!expenseActive}
+                    onClick={() => setExpenseCadence('monthly')}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex-1 text-center ${
+                      expenseCadence === 'monthly'
+                        ? 'clay-pill-sage text-slate-900'
+                        : 'clay-btn text-slate-600'
+                    }`}
+                  >
+                    Monthly Recurring
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!expenseActive}
+                    onClick={() => setExpenseCadence('one-off')}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex-1 text-center ${
+                      expenseCadence === 'one-off'
+                        ? 'clay-pill-sage text-slate-900'
+                        : 'clay-btn text-slate-600'
+                    }`}
+                  >
+                    One-off Capital Outlay
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab 2: Client Delays & Churn Risk */}
+        {/* Tab 2: Revenue & Clients */}
         {activeTab === 'revenue_clients' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Lever: Client Payment Delay */}
-            <div
-              className={`p-4 rounded-[var(--radius-control)] border transition-all ${
-                delayActive ? 'ring-1' : 'opacity-85'
-              }`}
-              style={{
-                backgroundColor: 'var(--bg)',
-                borderColor: delayActive ? 'var(--primary)' : 'var(--divider)',
-              }}
-            >
-              <div className="flex justify-between items-center mb-3">
+            <div className={`clay-cushion p-5 rounded-3xl space-y-3 ${delayActive ? 'ring-2 ring-amber-500' : 'opacity-80'}`}>
+              <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="lever-delay-toggle"
                     checked={delayActive}
                     onChange={(e) => setDelayActive(e.target.checked)}
-                    className="w-4 h-4 rounded cursor-pointer accent-[var(--primary)]"
+                    className="w-4 h-4 rounded cursor-pointer accent-amber-600"
                   />
-                  <label htmlFor="lever-delay-toggle" className="text-xs font-bold uppercase tracking-wider cursor-pointer" style={{ color: 'var(--text)' }}>
-                    Lever: Client Delay (`payment_delay`)
+                  <label htmlFor="lever-delay-toggle" className="text-xs font-extrabold uppercase tracking-wide text-slate-900 cursor-pointer">
+                    Client Delay (`payment_delay`)
                   </label>
                 </div>
                 {delayActive && (
-                  <span
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-[var(--radius-chip)] font-bold"
-                    style={{
-                      backgroundColor: 'var(--status-warning-bg)',
-                      color: 'var(--status-warning)',
-                    }}
-                  >
-                    +{delayDays} Days Late
+                  <span className="clay-card-inset text-[11px] font-mono font-black text-amber-800 px-3 py-1 rounded-full">
+                    +{delayDays}d Delay
                   </span>
                 )}
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs block mb-1" style={{ color: 'var(--muted)' }}>
-                    Target Concentrated Client:
-                  </label>
-                  <select
-                    disabled={!delayActive}
-                    value={delayClient}
-                    onChange={(e) => setDelayClient(e.target.value)}
-                    className="w-full p-2 text-xs rounded-[var(--radius-control)] border font-medium transition disabled:opacity-40"
-                    style={{
-                      backgroundColor: 'var(--surface)',
-                      borderColor: 'var(--ui-border)',
-                      color: 'var(--text)',
-                    }}
-                  >
-                    <option value="Apex Systems">Apex Systems (38% Revenue Concentration)</option>
-                    <option value="Globex Media">Globex Media (22% Revenue)</option>
-                    <option value="Initech Corp">Initech Corp (14% Revenue)</option>
-                    <option value="Soylent Group">Soylent Group (10% Revenue)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span style={{ color: 'var(--muted)' }}>Payment Delay Offset:</span>
-                    <span className="font-bold font-mono" style={{ color: 'var(--text)' }}>
-                      +{delayDays} Days
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={90}
-                    step={5}
-                    disabled={!delayActive}
-                    value={delayDays}
-                    onChange={(e) => setDelayDays(parseInt(e.target.value) || 0)}
-                    className="w-full accent-[var(--primary)] cursor-pointer disabled:opacity-40"
-                  />
-                  <div className="flex justify-between text-[11px] font-mono mt-1" style={{ color: 'var(--muted)' }}>
-                    <span>On Time (0d)</span>
-                    <span>Standard Net 30 (+30d)</span>
-                    <span>Severe (+90d)</span>
-                  </div>
-                </div>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={delayClient}
+                  onChange={(e) => setDelayClient(e.target.value)}
+                  className="w-full clay-card-inset px-3 py-2 rounded-xl text-xs text-slate-900 font-bold"
+                  placeholder="Target Client Name"
+                />
+                <input
+                  type="range"
+                  min={10}
+                  max={90}
+                  step={5}
+                  disabled={!delayActive}
+                  value={delayDays}
+                  onChange={(e) => setDelayDays(parseInt(e.target.value) || 0)}
+                  className="w-full accent-amber-600 cursor-pointer disabled:opacity-40"
+                />
               </div>
             </div>
 
-            {/* Lever: Lost Client */}
-            <div
-              className={`p-4 rounded-[var(--radius-control)] border transition-all ${
-                lostClientActive ? 'ring-1' : 'opacity-85'
-              }`}
-              style={{
-                backgroundColor: 'var(--bg)',
-                borderColor: lostClientActive ? 'var(--status-failed)' : 'var(--divider)',
-              }}
-            >
-              <div className="flex justify-between items-center mb-3">
+            {/* Lever: Lost Client (Churn) */}
+            <div className={`clay-cushion p-5 rounded-3xl space-y-3 ${lostClientActive ? 'ring-2 ring-rose-500' : 'opacity-80'}`}>
+              <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="lever-lost-toggle"
                     checked={lostClientActive}
                     onChange={(e) => setLostClientActive(e.target.checked)}
-                    className="w-4 h-4 rounded cursor-pointer accent-[var(--status-failed)]"
+                    className="w-4 h-4 rounded cursor-pointer accent-rose-600"
                   />
-                  <label htmlFor="lever-lost-toggle" className="text-xs font-bold uppercase tracking-wider cursor-pointer" style={{ color: 'var(--text)' }}>
-                    Lever: Client Churn (`lost_client`)
+                  <label htmlFor="lever-lost-toggle" className="text-xs font-extrabold uppercase tracking-wide text-slate-900 cursor-pointer">
+                    Lost Client (`lost_client`)
                   </label>
                 </div>
-                {lostClientActive && (
-                  <span
-                    className="text-[11px] font-mono px-2 py-0.5 rounded-[var(--radius-chip)] font-bold"
-                    style={{
-                      backgroundColor: 'var(--status-failed-bg)',
-                      color: 'var(--status-failed)',
-                    }}
-                  >
-                    Revenue Zeroed Post-Nov 1
-                  </span>
-                )}
               </div>
-
-              <div className="space-y-4">
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--muted)' }}>
-                  Simulates immediate loss of an ongoing account. Eliminates all scheduled recurring receivables starting Nov 1.
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={lostClientName}
+                  onChange={(e) => setLostClientName(e.target.value)}
+                  className="w-full clay-card-inset px-3 py-2 rounded-xl text-xs text-slate-900 font-bold"
+                  placeholder="Client Name (e.g. Apex Systems)"
+                />
+                <p className="text-[11px] text-slate-600 font-medium">
+                  Immediately zeros out all projected future inflows from this client.
                 </p>
-                <div>
-                  <label className="text-xs block mb-1" style={{ color: 'var(--muted)' }}>
-                    Select Lost Client:
-                  </label>
-                  <select
-                    disabled={!lostClientActive}
-                    value={lostClientName}
-                    onChange={(e) => setLostClientName(e.target.value)}
-                    className="w-full p-2 text-xs rounded-[var(--radius-control)] border font-medium transition disabled:opacity-40"
-                    style={{
-                      backgroundColor: 'var(--surface)',
-                      borderColor: 'var(--ui-border)',
-                      color: 'var(--text)',
-                    }}
-                  >
-                    <option value="Apex Systems">Apex Systems (Hero Stress-Test: -$38,000/mo)</option>
-                    <option value="Globex Media">Globex Media (-$22,000/mo)</option>
-                    <option value="Initech Corp">Initech Corp (-$14,000/mo)</option>
-                  </select>
-                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab 3: Payment Terms, Deposits & Pricing */}
+        {/* Tab 3: Terms & Cash */}
         {activeTab === 'terms_cash' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Lever: Deposit % Upfront */}
-            <div
-              className={`p-4 rounded-[var(--radius-control)] border transition-all ${
-                depositActive ? 'ring-1' : 'opacity-85'
-              }`}
-              style={{
-                backgroundColor: 'var(--bg)',
-                borderColor: depositActive ? 'var(--status-verified)' : 'var(--divider)',
-              }}
-            >
-              <div className="flex justify-between items-center mb-2">
+            {/* Lever: Upfront Deposit % */}
+            <div className={`clay-cushion p-5 rounded-3xl space-y-3 ${depositActive ? 'ring-2 ring-emerald-500' : 'opacity-80'}`}>
+              <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="lever-deposit-toggle"
                     checked={depositActive}
                     onChange={(e) => setDepositActive(e.target.checked)}
-                    className="w-4 h-4 rounded cursor-pointer accent-[var(--status-verified)]"
+                    className="w-4 h-4 rounded cursor-pointer accent-emerald-600"
                   />
-                  <label htmlFor="lever-deposit-toggle" className="text-xs font-bold uppercase cursor-pointer" style={{ color: 'var(--text)' }}>
+                  <label htmlFor="lever-deposit-toggle" className="text-xs font-extrabold uppercase text-slate-900 cursor-pointer">
                     Deposit % (`deposit_pct`)
                   </label>
                 </div>
               </div>
-              <p className="text-[11px] mb-3" style={{ color: 'var(--muted)' }}>
-                Upfront cash collected on contract start.
-              </p>
-              <div className="flex justify-between text-xs mb-1">
-                <span style={{ color: 'var(--muted)' }}>Upfront Rate:</span>
-                <span className="font-bold font-mono" style={{ color: 'var(--text)' }}>
-                  {depositPct}%
-                </span>
+              <div className="flex justify-between text-xs font-bold text-slate-700">
+                <span>Deposit Rate:</span>
+                <span className="font-mono text-slate-900 font-black">{depositPct}%</span>
               </div>
               <input
                 type="range"
@@ -798,40 +624,29 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
                 disabled={!depositActive}
                 value={depositPct}
                 onChange={(e) => setDepositPct(parseInt(e.target.value) || 0)}
-                className="w-full accent-[var(--status-verified)] cursor-pointer disabled:opacity-40"
+                className="w-full accent-emerald-600 cursor-pointer disabled:opacity-40"
               />
             </div>
 
             {/* Lever: Shift Payment Terms */}
-            <div
-              className={`p-4 rounded-[var(--radius-control)] border transition-all ${
-                termsActive ? 'ring-1' : 'opacity-85'
-              }`}
-              style={{
-                backgroundColor: 'var(--bg)',
-                borderColor: termsActive ? 'var(--primary)' : 'var(--divider)',
-              }}
-            >
-              <div className="flex justify-between items-center mb-2">
+            <div className={`clay-cushion p-5 rounded-3xl space-y-3 ${termsActive ? 'ring-2 ring-[#648283]' : 'opacity-80'}`}>
+              <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="lever-terms-toggle"
                     checked={termsActive}
                     onChange={(e) => setTermsActive(e.target.checked)}
-                    className="w-4 h-4 rounded cursor-pointer accent-[var(--primary)]"
+                    className="w-4 h-4 rounded cursor-pointer accent-[#648283]"
                   />
-                  <label htmlFor="lever-terms-toggle" className="text-xs font-bold uppercase cursor-pointer" style={{ color: 'var(--text)' }}>
-                    Terms Shift (`payment_terms`)
+                  <label htmlFor="lever-terms-toggle" className="text-xs font-extrabold uppercase text-slate-900 cursor-pointer">
+                    Terms (`payment_terms`)
                   </label>
                 </div>
               </div>
-              <p className="text-[11px] mb-3" style={{ color: 'var(--muted)' }}>
-                Shift all customer net invoice terms.
-              </p>
-              <div className="flex justify-between text-xs mb-1">
-                <span style={{ color: 'var(--muted)' }}>Shift Days:</span>
-                <span className="font-bold font-mono" style={{ color: 'var(--text)' }}>
+              <div className="flex justify-between text-xs font-bold text-slate-700">
+                <span>Shift Days:</span>
+                <span className="font-mono text-slate-900 font-black">
                   {paymentTermsDays >= 0 ? `+${paymentTermsDays}d` : `${paymentTermsDays}d`}
                 </span>
               </div>
@@ -843,40 +658,29 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
                 disabled={!termsActive}
                 value={paymentTermsDays}
                 onChange={(e) => setPaymentTermsDays(parseInt(e.target.value) || 0)}
-                className="w-full accent-[var(--primary)] cursor-pointer disabled:opacity-40"
+                className="w-full accent-[#648283] cursor-pointer disabled:opacity-40"
               />
             </div>
 
             {/* Lever: Price Adjustment */}
-            <div
-              className={`p-4 rounded-[var(--radius-control)] border transition-all ${
-                priceActive ? 'ring-1' : 'opacity-85'
-              }`}
-              style={{
-                backgroundColor: 'var(--bg)',
-                borderColor: priceActive ? 'var(--primary)' : 'var(--divider)',
-              }}
-            >
-              <div className="flex justify-between items-center mb-2">
+            <div className={`clay-cushion p-5 rounded-3xl space-y-3 ${priceActive ? 'ring-2 ring-purple-500' : 'opacity-80'}`}>
+              <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     id="lever-price-toggle"
                     checked={priceActive}
                     onChange={(e) => setPriceActive(e.target.checked)}
-                    className="w-4 h-4 rounded cursor-pointer accent-[var(--primary)]"
+                    className="w-4 h-4 rounded cursor-pointer accent-purple-600"
                   />
-                  <label htmlFor="lever-price-toggle" className="text-xs font-bold uppercase cursor-pointer" style={{ color: 'var(--text)' }}>
-                    Price Change (`price_change`)
+                  <label htmlFor="lever-price-toggle" className="text-xs font-extrabold uppercase text-slate-900 cursor-pointer">
+                    Price (`price_change`)
                   </label>
                 </div>
               </div>
-              <p className="text-[11px] mb-3" style={{ color: 'var(--muted)' }}>
-                Rate change across all active contracts.
-              </p>
-              <div className="flex justify-between text-xs mb-1">
-                <span style={{ color: 'var(--muted)' }}>Price Adjustment:</span>
-                <span className="font-bold font-mono" style={{ color: 'var(--text)' }}>
+              <div className="flex justify-between text-xs font-bold text-slate-700">
+                <span>Price Adjustment:</span>
+                <span className="font-mono text-slate-900 font-black">
                   {priceChangePct >= 0 ? `+${priceChangePct}%` : `${priceChangePct}%`}
                 </span>
               </div>
@@ -888,53 +692,43 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
                 disabled={!priceActive}
                 value={priceChangePct}
                 onChange={(e) => setPriceChangePct(parseInt(e.target.value) || 0)}
-                className="w-full accent-[var(--primary)] cursor-pointer disabled:opacity-40"
+                className="w-full accent-purple-600 cursor-pointer disabled:opacity-40"
               />
             </div>
           </div>
         )}
 
         {/* Live Calculated Delta Preview Banner */}
-        <div
-          className="mt-6 p-4 rounded-[var(--radius-control)] border flex flex-wrap justify-between items-center gap-4 transition-all duration-200 glass-panel"
-          style={{
-            borderColor: 'var(--divider)',
-          }}
-        >
-          <div className="flex items-center space-x-4">
+        <div className="mt-5 p-4 clay-card-inset rounded-2xl flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center space-x-5 text-xs">
             <div>
-              <span className="text-[11px] uppercase tracking-wider block font-semibold" style={{ color: 'var(--muted)' }}>
+              <span className="text-[10px] uppercase tracking-wider block font-bold text-slate-500">
                 Est. Monthly Outflow Burden:
               </span>
-              <span
-                className="text-base font-bold font-[var(--font-mono)] tabular-nums"
-                style={{
-                  color: monthlyOutflowDelta > 0 ? 'var(--status-warning)' : 'var(--text)',
-                }}
-              >
+              <span className={`text-base font-extrabold font-mono ${monthlyOutflowDelta > 0 ? 'text-rose-700' : 'text-slate-900'}`}>
                 {monthlyOutflowDelta > 0 ? `+$${monthlyOutflowDelta.toLocaleString()}/mo` : '$0.00'}
               </span>
             </div>
 
-            <div className="h-8 w-px" style={{ backgroundColor: 'var(--divider)' }} />
+            <div className="h-8 w-px bg-slate-300" />
 
             <div>
-              <span className="text-[11px] uppercase tracking-wider block font-semibold" style={{ color: 'var(--muted)' }}>
+              <span className="text-[10px] uppercase tracking-wider block font-bold text-slate-500">
                 Cash Timing Impact:
               </span>
-              <span className="text-xs font-medium" style={{ color: 'var(--text)' }}>
+              <span className="text-xs font-bold text-slate-800">
                 {delayActive ? `${delayClient} delayed +${delayDays}d` : 'Standard scheduled inflows'}
               </span>
             </div>
 
             {depositActive && (
               <>
-                <div className="h-8 w-px" style={{ backgroundColor: 'var(--divider)' }} />
+                <div className="h-8 w-px bg-slate-300" />
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider block font-semibold" style={{ color: 'var(--muted)' }}>
+                  <span className="text-[10px] uppercase tracking-wider block font-bold text-slate-500">
                     Working Capital Relief:
                   </span>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--status-verified)' }}>
+                  <span className="text-xs font-black text-emerald-700">
                     +{depositPct}% collected upfront
                   </span>
                 </div>
@@ -943,30 +737,24 @@ export const ScenarioLeverDock: React.FC<ScenarioLeverDockProps> = ({
           </div>
 
           {/* Action Trigger Buttons */}
-          <div className="flex items-center space-x-3">
-            <button
-              type="button"
-              onClick={handleRun}
-              disabled={isLoading}
-              className="px-6 py-2.5 rounded-[var(--radius-control)] text-xs font-bold shadow-md transition-all duration-200 hover:scale-102 active:scale-98 disabled:opacity-50 inline-flex items-center space-x-2"
-              style={{
-                background: 'var(--primary-gradient)',
-                color: 'var(--on-primary)',
-              }}
-            >
-              {isLoading ? (
-                <>
-                  <span className="animate-spin text-sm">⟳</span>
-                  <span>Executing Engine Math...</span>
-                </>
-              ) : (
-                <>
-                  <span>⚡</span>
-                  <span>Run Scenario Simulation ({activeChanges.length})</span>
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleRun}
+            disabled={isLoading}
+            className="px-6 py-2.5 clay-pill-sage rounded-full text-xs font-black text-slate-900 flex items-center space-x-2 shadow-md transition-all hover:scale-102"
+          >
+            {isLoading ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Executing Engine Math...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Run Scenario Simulation ({activeChanges.length})</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
