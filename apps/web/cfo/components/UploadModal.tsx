@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export interface UploadModalProps {
   isOpen: boolean;
@@ -13,13 +13,65 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   onClose,
   onSuccess,
   apiBaseUrl = 'http://localhost:8000',
-  authToken,
+  authToken: initialAuthToken,
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [sourceType, setSourceType] = useState<string>('invoices');
   const [uploading, setUploading] = useState<boolean>(false);
   const [report, setReport] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeToken, setActiveToken] = useState<string>(initialAuthToken || '');
+  const [tokenStatus, setTokenStatus] = useState<string>('Obtaining token...');
+
+  // Auto-acquire dev token if not provided
+  useEffect(() => {
+    if (initialAuthToken) {
+      setActiveToken(initialAuthToken);
+      setTokenStatus('Authenticated (Prop)');
+      return;
+    }
+
+    const resolveToken = async () => {
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('cfo_auth_token');
+        if (cached) {
+          setActiveToken(cached);
+          setTokenStatus('Authenticated (Cached)');
+          return;
+        }
+      }
+
+      try {
+        const tokenRes = await fetch(`${apiBaseUrl}/v1/dev/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: '10000000-0000-0000-0000-000000000001',
+            org_id: '00000000-0000-0000-0000-000000000001',
+            role: 'owner',
+          }),
+        });
+
+        if (tokenRes.ok) {
+          const data = await tokenRes.json();
+          const jwt = data.access_token;
+          setActiveToken(jwt);
+          setTokenStatus('Authenticated (Acme Owner)');
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cfo_auth_token', jwt);
+          }
+        } else {
+          setTokenStatus('Token endpoint unavailable');
+        }
+      } catch (err) {
+        setTokenStatus('Offline token error');
+      }
+    };
+
+    if (isOpen) {
+      resolveToken();
+    }
+  }, [isOpen, initialAuthToken, apiBaseUrl]);
 
   if (!isOpen) return null;
 
@@ -30,15 +82,47 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     setError(null);
     setReport(null);
 
+    let token = activeToken;
+    if (!token) {
+      try {
+        const tokenRes = await fetch(`${apiBaseUrl}/v1/dev/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: '10000000-0000-0000-0000-000000000001',
+            org_id: '00000000-0000-0000-0000-000000000001',
+            role: 'owner',
+          }),
+        });
+        if (tokenRes.ok) {
+          const data = await tokenRes.json();
+          token = data.access_token;
+          setActiveToken(token);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('cfo_auth_token', token);
+          }
+        }
+      } catch (e) {
+        // Will be caught below if token is still missing
+      }
+    }
+
+    if (!token) {
+      setError('Unable to authenticate. Please ensure the backend server is running on http://localhost:8000.');
+      setUploading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('file_type', sourceType);
     formData.append('source_type', sourceType);
 
     try {
       const res = await fetch(`${apiBaseUrl}/v1/finance/imports`, {
         method: 'POST',
         headers: {
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -48,14 +132,20 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         throw new Error(json.error?.message || `Upload failed (HTTP ${res.status})`);
       }
 
-      setReport(json.data);
-      onSuccess(json.data);
+      const reportData = json.data || json;
+      setReport(reportData);
+      onSuccess(reportData);
     } catch (err: any) {
       setError(err.message || 'Error uploading file');
     } finally {
       setUploading(false);
     }
   };
+
+  const flaggedCount = report ? (report.flagged_rows ?? report.anomalies_flagged ?? 0) : 0;
+  const acceptedCount = report ? (report.accepted_rows ?? report.valid_rows ?? 0) : 0;
+  const rejectedCount = report ? (report.rejected_rows ?? 0) : 0;
+  const totalCount = report ? (report.total_rows ?? 0) : 0;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 flex items-center justify-center p-4">
@@ -84,9 +174,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             >
               ↑
             </span>
-            <h3 className="text-base font-bold" style={{ color: 'var(--text)' }}>
-              Ingest Financial CSV
-            </h3>
+            <div>
+              <h3 className="text-base font-bold" style={{ color: 'var(--text)' }}>
+                Ingest Financial CSV
+              </h3>
+              <p className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                Session: <span className="font-medium text-emerald-600 dark:text-emerald-400">● {tokenStatus}</span>
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -152,32 +247,37 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
           {report && (
             <div
-              className="p-4 rounded-[var(--radius-control)] border text-xs space-y-2"
+              className="p-4 rounded-[var(--radius-control)] border text-xs space-y-3"
               style={{
                 backgroundColor: 'var(--bg)',
                 borderColor: 'var(--divider)',
               }}
             >
               <div className="flex justify-between items-center">
-                <span className="font-bold uppercase" style={{ color: 'var(--muted)' }}>
+                <span className="font-bold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>
                   Ingestion Quality Report
                 </span>
                 <span
-                  className="px-2 py-0.5 rounded-[var(--radius-chip)] text-[11px] font-semibold"
+                  className="px-2.5 py-1 rounded-[var(--radius-chip)] text-[11px] font-semibold"
                   style={{
-                    backgroundColor: report.anomalies_flagged > 0 ? 'var(--status-warning-bg)' : 'var(--status-verified-bg)',
-                    color: report.anomalies_flagged > 0 ? 'var(--status-warning)' : 'var(--status-verified)',
+                    backgroundColor: flaggedCount > 0 ? 'var(--status-warning-bg)' : 'var(--status-verified-bg)',
+                    color: flaggedCount > 0 ? 'var(--status-warning)' : 'var(--status-verified)',
                   }}
                 >
-                  {report.anomalies_flagged > 0 ? '⚠ Anomalies Detected' : '✓ Clean Ingestion'}
+                  {flaggedCount > 0 ? `⚠ ${flaggedCount} Anomalies Flagged` : '✓ Clean Ingestion (100% Accepted)'}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-2 font-[var(--font-mono)] tabular-nums">
-                <div>Total Rows: <span className="font-bold">{report.total_rows}</span></div>
-                <div>Imported: <span className="font-bold">{report.valid_rows}</span></div>
-                <div>Anomalies: <span className="font-bold">{report.anomalies_flagged}</span></div>
-                <div>Hash: <span className="font-bold">{report.content_hash?.slice(0, 8)}...</span></div>
+              <div className="grid grid-cols-2 gap-2.5 font-[var(--font-mono)] tabular-nums text-xs">
+                <div>Total Rows: <span className="font-bold">{totalCount}</span></div>
+                <div>Accepted: <span className="font-bold text-emerald-600 dark:text-emerald-400">{acceptedCount}</span></div>
+                <div>Flagged Anomalies: <span className="font-bold text-amber-600 dark:text-amber-400">{flaggedCount}</span></div>
+                <div>Rejected: <span className="font-bold text-rose-600 dark:text-rose-400">{rejectedCount}</span></div>
               </div>
+              {report.batch_id && (
+                <div className="text-[11px] font-[var(--font-mono)] opacity-70 truncate">
+                  Batch ID: {report.batch_id}
+                </div>
+              )}
             </div>
           )}
         </div>

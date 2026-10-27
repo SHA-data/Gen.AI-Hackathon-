@@ -1,5 +1,6 @@
 from uuid import UUID
 from fastapi import FastAPI, Depends, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from packages.contracts.envelope import ErrorEnvelope
@@ -30,6 +31,13 @@ app.add_exception_handler(Exception, global_exception_handler)
 
 # Middleware
 app.add_middleware(RequestIdMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Mount CFO routes
 app.include_router(finance_router)
