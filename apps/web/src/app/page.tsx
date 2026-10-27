@@ -66,44 +66,44 @@ export default function UnifiedSystemCockpit() {
   return (
     <div className="flex h-screen w-screen overflow-hidden p-2.5 gap-2.5 font-sans">
       {/* ============================================================== */}
-      {/* 1. LEFT NAVIGATION RAIL (Beige & Light-Brown Claymorphic)      */}
+      {/* 1. LEFT NAVIGATION RAIL (Official Palette Deep Slate Rail)     */}
       {/* ============================================================== */}
-      <aside className="w-60 flex-shrink-0 flex flex-col justify-between p-3.5 clay-sidebar text-[#2d1f14] relative overflow-hidden">
-        {/* Subtle Ambient Backlights (Warm Honey / Amber Tones) */}
-        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-16 -right-10 w-40 h-40 rounded-full bg-orange-500/10 blur-3xl pointer-events-none" />
+      <aside className="w-60 flex-shrink-0 flex flex-col justify-between p-3.5 clay-sidebar text-slate-200 relative overflow-hidden">
+        {/* Subtle Ambient Backlights */}
+        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-16 -right-10 w-40 h-40 rounded-full bg-teal-500/15 blur-3xl pointer-events-none" />
 
         {/* Top Profile / Executive Workspace */}
         <div className="relative z-10 flex flex-col items-center text-center pb-2.5">
           <div className="relative mb-2 group cursor-pointer">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#8f7a65] via-[#a8947f] to-[#c7b6a3] p-[2.5px] shadow-[0_6px_16px_rgba(80,60,40,0.2)] transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
-              <div className="w-full h-full rounded-full bg-[#f4efe8] flex items-center justify-center overflow-hidden border-2 border-white">
-                <ShieldCheck className="w-7 h-7 text-[#648283]" />
+            <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-400 via-teal-500 to-indigo-500 p-[2.5px] shadow-[0_8px_20px_rgba(0,0,0,0.45)] transition-transform duration-300 group-hover:scale-105 flex items-center justify-center">
+              <div className="w-full h-full rounded-full bg-[#182337] flex items-center justify-center overflow-hidden border-2 border-white/20">
+                <ShieldCheck className="w-7 h-7 text-cyan-300" />
               </div>
             </div>
-            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#b8a591] shadow-sm animate-pulse" />
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#182337] shadow-sm animate-pulse" />
           </div>
 
-          <h2 className="text-sm font-extrabold text-[#26190f] tracking-tight">
+          <h2 className="text-sm font-bold text-white tracking-wide font-sans">
             NeuralCFO Executive
           </h2>
-          <p className="text-[10px] font-semibold text-[#5c4a3b]">
+          <p className="text-[10px] text-slate-400 font-sans">
             Acme Digital Agency · Sovereign
           </p>
         </div>
 
-        {/* Navigation Items (Beige / Light Brown Clay Style) */}
+        {/* Navigation Items (Official Palette Deep Slate Style) */}
         <nav className="relative z-10 flex-1 py-1 flex flex-col space-y-1.5 overflow-y-auto">
           {/* Dashboard / Executive Overview */}
           <button
             onClick={() => setActivePart("overview")}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-2xl text-left transition-all ${
               activePart === "overview"
-                ? "clay-sidebar-item-active font-extrabold text-[#1f140b] shadow-md"
-                : "clay-sidebar-item font-bold text-[#3b2b1e] hover:text-[#170d06]"
+                ? "clay-sidebar-item-active font-extrabold text-slate-900 shadow-md"
+                : "clay-sidebar-item font-semibold text-slate-300 hover:text-white"
             }`}
           >
-            <div className={`p-1.5 rounded-xl ${activePart === "overview" ? "bg-[#648283] text-white shadow-xs" : "bg-white/60 text-[#3b2b1e]"}`}>
+            <div className={`p-1.5 rounded-xl ${activePart === "overview" ? "bg-slate-900 text-teal-300 shadow-xs" : "bg-slate-800/80 text-slate-400"}`}>
               <LayoutDashboard className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold tracking-wide">
@@ -116,11 +116,11 @@ export default function UnifiedSystemCockpit() {
             onClick={() => setActivePart("chat")}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-2xl text-left transition-all ${
               activePart === "chat"
-                ? "clay-sidebar-item-active font-extrabold text-[#1f140b] shadow-md"
-                : "clay-sidebar-item font-bold text-[#3b2b1e] hover:text-[#170d06]"
+                ? "clay-sidebar-item-active font-extrabold text-slate-900 shadow-md"
+                : "clay-sidebar-item font-semibold text-slate-300 hover:text-white"
             }`}
           >
-            <div className={`p-1.5 rounded-xl ${activePart === "chat" ? "bg-[#648283] text-white shadow-xs" : "bg-white/60 text-[#3b2b1e]"}`}>
+            <div className={`p-1.5 rounded-xl ${activePart === "chat" ? "bg-slate-900 text-teal-300 shadow-xs" : "bg-slate-800/80 text-slate-400"}`}>
               <MessageSquare className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -135,11 +135,11 @@ export default function UnifiedSystemCockpit() {
             onClick={() => setActivePart("cfo")}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-2xl text-left transition-all ${
               activePart === "cfo"
-                ? "clay-sidebar-item-active font-extrabold text-[#1f140b] shadow-md"
-                : "clay-sidebar-item font-bold text-[#3b2b1e] hover:text-[#170d06]"
+                ? "clay-sidebar-item-active font-extrabold text-slate-900 shadow-md"
+                : "clay-sidebar-item font-semibold text-slate-300 hover:text-white"
             }`}
           >
-            <div className={`p-1.5 rounded-xl ${activePart === "cfo" ? "bg-[#648283] text-white shadow-xs" : "bg-white/60 text-[#3b2b1e]"}`}>
+            <div className={`p-1.5 rounded-xl ${activePart === "cfo" ? "bg-slate-900 text-teal-300 shadow-xs" : "bg-slate-800/80 text-slate-400"}`}>
               <BarChart3 className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -154,11 +154,11 @@ export default function UnifiedSystemCockpit() {
             onClick={() => setActivePart("moonshot")}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-2xl text-left transition-all ${
               activePart === "moonshot"
-                ? "clay-sidebar-item-active font-extrabold text-[#1f140b] shadow-md"
-                : "clay-sidebar-item font-bold text-[#3b2b1e] hover:text-[#170d06]"
+                ? "clay-sidebar-item-active font-extrabold text-slate-900 shadow-md"
+                : "clay-sidebar-item font-semibold text-slate-300 hover:text-white"
             }`}
           >
-            <div className={`p-1.5 rounded-xl ${activePart === "moonshot" ? "bg-[#648283] text-white shadow-xs" : "bg-white/60 text-[#3b2b1e]"}`}>
+            <div className={`p-1.5 rounded-xl ${activePart === "moonshot" ? "bg-slate-900 text-teal-300 shadow-xs" : "bg-slate-800/80 text-slate-400"}`}>
               <Compass className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -169,36 +169,36 @@ export default function UnifiedSystemCockpit() {
           </button>
 
           {/* Secondary Links */}
-          <div className="pt-2 border-t border-[#8f7a65]/30 space-y-1">
+          <div className="pt-2 border-t border-white/10 space-y-1">
             <button
               onClick={() => setActivePart("cfo")}
-              className="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-left text-[#4a3a2d] hover:text-[#1a120b] transition-colors"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-left text-slate-400 hover:text-slate-200 transition-colors"
             >
-              <Heart className="w-3.5 h-3.5 text-[#cb7a72]" />
-              <span className="text-xs font-bold">Favorites & Levers</span>
+              <Heart className="w-3.5 h-3.5 text-rose-400" />
+              <span className="text-xs font-semibold">Favorites & Levers</span>
             </button>
 
             <button
               onClick={() => setActivePart("chat")}
-              className="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-left text-[#4a3a2d] hover:text-[#1a120b] transition-colors"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-left text-slate-400 hover:text-slate-200 transition-colors"
             >
-              <Zap className="w-3.5 h-3.5 text-amber-700" />
-              <span className="text-xs font-bold">Activity & Audit</span>
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-xs font-semibold">Activity & Audit</span>
             </button>
           </div>
         </nav>
 
-        {/* Bottom Banner Card (Clay Inset Cushion) */}
+        {/* Bottom Banner Card (Clay Dark Cushion) */}
         <div className="relative z-10 pt-2">
-          <div className="p-3 rounded-2xl bg-white/45 border border-white/70 shadow-inner flex flex-col items-center text-center space-y-1.5">
-            <div className="w-7 h-7 rounded-full bg-white/80 border border-[#8f7a65]/40 flex items-center justify-center text-[#5c4735] shadow-xs">
+          <div className="p-3 rounded-2xl clay-dark-card border border-white/10 flex flex-col items-center text-center space-y-1.5">
+            <div className="w-7 h-7 rounded-full bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-sm">
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
             <div>
-              <div className="text-[10px] font-black text-[#26190f] tracking-wide">
+              <div className="text-[10px] font-bold text-white tracking-wide">
                 NeuralCFO Sovereign
               </div>
-              <div className="text-[9px] text-[#5c4a3b] font-semibold leading-tight">
+              <div className="text-[9px] text-slate-400 leading-tight">
                 Zetaris Data & Meterless Verified
               </div>
             </div>
