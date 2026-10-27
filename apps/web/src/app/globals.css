@@ -3,69 +3,236 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 248, 250, 252;
-  --background-start-rgb: 8, 14, 26;
-  --background-end-rgb: 3, 7, 18;
+  --clay-bg: #e6e3dc;
+  --clay-card-bg: #edeae3;
+  --clay-dark-bg: #141f32;
+  --clay-sage: #94af9f;
+  --clay-slate-teal: #648283;
+  --clay-lavender: #c4b6d6;
+  --clay-coral: #cb7a72;
+}
+
+/* Hide default scrollbars for an ultra-clean mobile-app/tactile look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: radial-gradient(circle at 20% 15%, rgba(30, 58, 138, 0.25) 0%, transparent 40%),
-              radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.2) 0%, transparent 45%),
-              radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-              rgb(var(--background-start-rgb));
+  background: radial-gradient(circle at 20% 15%, #f2efe9 0%, #e5e2db 50%, #d8d4cb 100%);
+  color: #1e293b;
   min-height: 100vh;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
 }
 
-/* Liquid Glass Kit Classes */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.2),
-              0 16px 36px -8px rgba(0, 0, 0, 0.5),
-              0 0 1px 1px rgba(255, 255, 255, 0.05);
+/* ========================================================================= */
+/* 1. TACTILE PILLOWY CLAYMORPHIC SYSTEM (New Image 1 & 2 Style)             */
+/* ========================================================================= */
+
+.clay-cushion {
+  background: #edeae3;
+  box-shadow: 14px 14px 28px #c8c4bc, -10px -10px 24px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 1.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.glass-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 1px 2px 0 rgba(255, 255, 255, 0.25),
-              0 10px 25px -5px rgba(0, 0, 0, 0.4);
+.clay-cushion:hover {
+  transform: translateY(-2px);
+  box-shadow: 18px 18px 34px #c2beba, -12px -12px 28px #ffffff;
 }
 
-.glass-pill {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.04) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.35),
-              0 4px 12px 0 rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(12px);
+.clay-card {
+  background: #ede9e2;
+  box-shadow: 12px 12px 24px #cbcfd8, -10px -10px 22px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 1.5rem;
+}
+
+.clay-card-sm {
+  background: #eeeae4;
+  box-shadow: 7px 7px 16px #cac6be, -7px -7px 16px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 1.25rem;
+}
+
+.clay-card-inset {
+  background: #dfdbd4;
+  box-shadow: inset 4px 4px 8px #c5c1ba, inset -4px -4px 8px #ffffff;
+  border-radius: 1.25rem;
+}
+
+/* Notched Slider Track from Image 2 */
+.clay-notched-track {
+  background: #e2ded7;
+  box-shadow: inset 3px 3px 6px #c4c0b8, inset -3px -3px 6px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 9999px;
+}
+
+/* Buttons from Image 2 */
+.clay-btn {
+  background: #eeeae4;
+  box-shadow: 6px 6px 14px #cac6be, -5px -5px 12px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 9999px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-pill:hover {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.08) 100%);
-  border-color: rgba(255, 255, 255, 0.3);
+.clay-btn:hover {
   transform: translateY(-1px);
+  box-shadow: 8px 8px 18px #c2beba, -6px -6px 14px #ffffff;
 }
 
-.glass-pill-active {
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.35) 0%, rgba(14, 165, 233, 0.15) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.6);
-  box-shadow: inset 0 1px 2px 0 rgba(255, 255, 255, 0.5),
-              0 0 20px 0 rgba(56, 189, 248, 0.35);
-  color: #38bdf8;
+.clay-btn:active, .clay-btn-pressed {
+  transform: translateY(1px);
+  box-shadow: inset 3px 3px 6px #c4c0b8, inset -3px -3px 6px #ffffff;
 }
 
-/* Claymorphic 3D Card Depth */
-.clay-card {
+/* Sage Green Pill Button from Image 2 */
+.clay-pill-sage {
+  background: #94af9f;
+  box-shadow: 6px 6px 14px #b8c7bd, -4px -4px 10px #ffffff, inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 9999px;
+  color: #14281e;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.clay-pill-sage:hover {
+  transform: translateY(-1px);
+  background: #9ebbAA;
+  box-shadow: 8px 8px 18px #aab9af, -5px -5px 12px #ffffff;
+}
+
+/* Slate Teal Pill Button from Image 2 ("Pressed" or "Elevation") */
+.clay-pill-teal {
+  background: #648283;
+  box-shadow: 6px 6px 14px #9aaeb0, -4px -4px 10px #ffffff, inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+  color: #ffffff;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.clay-pill-teal:hover {
+  transform: translateY(-1px);
+  background: #6e8e8f;
+}
+
+/* Lavender Pill Button from Image 2 ("Hover" or Accent) */
+.clay-pill-lavender {
+  background: #c5b8d8;
+  box-shadow: 6px 6px 14px #b8accc, -4px -4px 10px #ffffff, inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 9999px;
+  color: #3b2852;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+/* Lavender Bordered Form Input from Image 2 */
+.clay-input-lavender {
+  background: #faf8f5;
+  border: 2px solid #d4c4e8;
+  box-shadow: 4px 4px 10px #c5c1ba, inset 0 1px 2px rgba(0,0,0,0.05);
+  border-radius: 9999px;
+}
+
+/* Elevated Squircle for Icons */
+.clay-squircle {
+  background: linear-gradient(135deg, #f7f5f0 0%, #e2ded7 100%);
+  box-shadow: 6px 6px 14px #c8c4bc, -5px -5px 12px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.95);
   border-radius: 1.25rem;
-  background: #111a2e;
-  box-shadow: 12px 12px 24px #080d17,
-              -8px -8px 20px rgba(255, 255, 255, 0.04),
-              inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Segmented Tab Bar from Image 2 */
+.clay-segmented-bar {
+  background: #f7f5f0;
+  box-shadow: 6px 6px 16px #cac6be, -5px -5px 14px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 1.25rem;
+  padding: 4px;
+}
+
+/* ========================================================================= */
+/* 2. DARK SLATE NAV RAIL (Image 1 Style: Deep Navy Embossed Rail)           */
+/* ========================================================================= */
+
+.clay-sidebar {
+  background: linear-gradient(180deg, #182337 0%, #111a2a 100%);
+  box-shadow: 14px 14px 30px rgba(15, 23, 42, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+}
+
+.clay-sidebar-item {
+  color: #94a3b8;
+  border-radius: 1.15rem;
+  transition: all 0.2s ease;
+}
+
+.clay-sidebar-item:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.clay-sidebar-item-active {
+  background: #edeae3;
+  color: #0f172a;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 2px #ffffff;
+}
+
+.clay-dark-card {
+  background: #182439;
+  box-shadow: 10px 10px 24px rgba(10, 16, 28, 0.45), -6px -6px 16px rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+}
+
+/* ========================================================================= */
+/* 3. LIQUID GLASS KIT SYSTEM (Image 2 Style: Crystal Glass & Jelly Pills)   */
+/* ========================================================================= */
+
+.liquid-glass-slab {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 20px 45px -10px rgba(120, 116, 110, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  border-radius: 1.75rem;
+}
+
+.iridescent-card {
+  background: linear-gradient(135deg, rgba(254, 205, 211, 0.7) 0%, rgba(221, 214, 254, 0.75) 50%, rgba(165, 243, 252, 0.7) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 36px -5px rgba(168, 85, 247, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  border-radius: 1.5rem;
+}
+
+/* 3D Vertical Pillar for Bar Charts */
+.clay-bar {
+  border-radius: 9999px;
+  box-shadow: 4px 4px 10px #c5c1ba, -3px -3px 8px #ffffff, inset 0 2px 3px rgba(255, 255, 255, 0.7);
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease;
+}
+
+.clay-bar:hover {
+  transform: scaleY(1.04);
 }

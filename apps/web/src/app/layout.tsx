@@ -4,7 +4,7 @@ import { EvidenceDrawerProvider } from "@/components/evidence/EvidenceDrawer";
 
 export const metadata = {
   title: "NeuralCFO - Unified AI Decision Engine",
-  description: "Next-Generation Liquid Glassmorphism & Claymorphic Decision Cockpit for Small Business Finance & Strategy",
+  description: "Next-Generation Liquid Glass & Claymorphic Decision Cockpit for Small Business Finance & Strategy",
 };
 
 export default function RootLayout({
@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen text-slate-100 flex flex-col font-sans antialiased overflow-x-hidden">
+    <html lang="en">
+      <body className="min-h-screen text-slate-800 flex flex-col font-sans antialiased overflow-x-hidden selection:bg-cyan-200">
         <EvidenceDrawerProvider>
           {children}
         </EvidenceDrawerProvider>
