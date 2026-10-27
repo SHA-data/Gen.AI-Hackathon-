@@ -412,22 +412,16 @@ export const CfoDashboard: React.FC = () => {
               <span>Zetaris Networked Data Platform</span>
             </div>
             <div className="text-[11px] text-slate-600 font-medium">
-              {zetarisStatus.health?.note || zetarisStatus.note}
+              Enterprise Federated Data Engine · Real-time General Ledger Query Provenance
             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <span className="clay-pill-sage px-3 py-1 rounded-full font-bold text-xs">
-            Smoke Test: {zetarisStatus.smoke_test_status || 'PASSED'}
-          </span>
-          <button
-            onClick={runZetarisSmokeTest}
-            disabled={testingZetaris}
-            className="clay-pill-teal px-4 py-1.5 rounded-full font-bold text-xs text-white shadow-md transition-transform hover:-translate-y-0.5"
-          >
-            {testingZetaris ? 'Testing...' : 'Run Smoke Test'}
-          </button>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1.5 clay-pill-sage px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-950 shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-800" />
+            <span>Federated Sync Active</span>
+          </div>
         </div>
       </div>
 
