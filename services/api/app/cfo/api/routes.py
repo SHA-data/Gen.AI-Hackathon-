@@ -1,0 +1,383 @@
+from datetime import date
+from decimal import Decimal
+import json
+from typing import Any, Dict, Optional
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, File, Form, Header, UploadFile
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from packages.contracts.envelope import ToolResultEnvelope, ToolStatus
+from packages.contracts.finance import ScenarioRunRequest
+from services.api.app.cfo.adapters.zetaris_adapter import ZetarisAdapter
+from services.api.app.cfo.importers.csv_importer import CsvImporter
+from services.api.app.cfo.models import FinanceSettings, ImportBatch
+from services.api.app.cfo.services.baseline_service import BaselineService
+from services.api.app.cfo.services.finance_service import RealFinanceService
+from services.api.app.cfo.services.scenario_service import ScenarioService
+from services.api.app.cfo.services.snapshot_service import RealCfoSnapshotService
+from services.api.app.cfo.verification.lineage import LineageResolver
+from services.api.app.core.audit import create_audit_log
+from services.api.app.core.auth import AuthContext, RoleChecker, get_auth_context
+from services.api.app.core.database import get_db
+from services.api.app.core.errors import ForbiddenError, NotFoundError, ValidationError
+
+router = APIRouter(prefix="/v1/finance", tags=["Finance"])
+
+
+@router.post("/imports")
+async def import_financial_file(
+    file: UploadFile = File(...),
+    file_type: str = Form(default="invoices"),
+    column_mapping: Optional[str] = Form(default=None),
+    idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Multipart CSV ingestion endpoint. Admin/owner only.
+
+    Idempotent by file hash or Idempotency-Key.
+    Duplicates are FLAGGED, never silently deleted.
+    Ambiguities are surfaced in the Quality Report.
+    """
+    RoleChecker("admin")(auth)
+
+    content = await file.read()
+    if not content:
+        raise ValidationError("Uploaded file is empty")
+
+    override_map = None
+    if column_mapping:
+        try:
+            override_map = json.loads(column_mapping)
+        except Exception:
+            raise ValidationError("Invalid JSON format for column_mapping")
+
+    batch = await CsvImporter.import_csv(
+        session=db,
+        org_id=auth.org_id,
+        filename=file.filename or "uploaded.csv",
+        content=content,
+        file_type=file_type,
+        override_mapping=override_map,
+        idempotency_key=idempotency_key,
+    )
+
+    await create_audit_log(
+        session=db,
+        org_id=auth.org_id,
+        actor_user_id=auth.user_id,
+        action="IMPORT_BATCH",
+        entity_type="import_batch",
+        entity_id=batch.id,
+        decision="accepted" if batch.status == "completed" else batch.status,
+        metadata={"filename": batch.filename, "content_hash": batch.content_hash, "status": batch.status},
+    )
+
+    return {
+        "batch_id": str(batch.id),
+        "status": batch.status,
+        "filename": batch.filename,
+        "total_rows": batch.total_rows,
+        "accepted_rows": batch.accepted_rows,
+        "rejected_rows": batch.rejected_rows,
+        "flagged_rows": batch.flagged_rows,
+        "quality_report": batch.quality_report,
+    }
+
+
+@router.get("/imports/{batch_id}")
+async def get_import_quality_report(
+    batch_id: UUID,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve full quality report for an import batch."""
+    batch = await db.get(ImportBatch, batch_id)
+    if not batch or batch.org_id != auth.org_id:
+        raise NotFoundError(f"Import batch {batch_id} not found")
+
+    return {
+        "batch_id": str(batch.id),
+        "status": batch.status,
+        "filename": batch.filename,
+        "total_rows": batch.total_rows,
+        "accepted_rows": batch.accepted_rows,
+        "rejected_rows": batch.rejected_rows,
+        "flagged_rows": batch.flagged_rows,
+        "column_mapping": batch.column_mapping,
+        "quality_report": batch.quality_report,
+        "created_at": batch.created_at.isoformat(),
+    }
+
+
+@router.post("/baseline/run")
+async def run_baseline_forecast(
+    horizon_weeks: int = 26,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generates an immutable baseline forecast for the tenant."""
+    run, points = await BaselineService.run_baseline(
+        session=db,
+        org_id=auth.org_id,
+        horizon_weeks=horizon_weeks,
+    )
+
+    await create_audit_log(
+        session=db,
+        org_id=auth.org_id,
+        actor_user_id=auth.user_id,
+        action="RUN_BASELINE",
+        entity_type="forecast_run",
+        entity_id=run.id,
+        decision="verified",
+        metadata={
+            "run_id": str(run.id),
+            "horizon_weeks": horizon_weeks,
+            "min_cash": f"{run.min_cash:.2f}",
+            "baseline_hash": run.baseline_hash,
+        },
+    )
+
+    return {
+        "run_id": str(run.id),
+        "case_type": run.case_type,
+        "engine_version": run.engine_version,
+        "horizon_weeks": run.horizon_weeks,
+        "min_cash": f"{run.min_cash:.2f}",
+        "min_cash_date": run.min_cash_date.isoformat(),
+        "end_cash": f"{run.end_cash:.2f}",
+        "runway_weeks": run.runway_weeks,
+        "reserve_breach": run.reserve_breach,
+        "cash_floor_breach": run.cash_floor_breach,
+        "baseline_hash": run.baseline_hash,
+        "weekly_points_count": len(points),
+    }
+
+
+@router.get("/baseline")
+async def get_baseline_forecast(
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve latest immutable baseline forecast."""
+    result = await BaselineService.get_latest_baseline(db, auth.org_id)
+    if not result:
+        raise NotFoundError("No baseline forecast found. Please run POST /v1/finance/baseline/run first.")
+    run, points = result
+
+    return {
+        "run_id": str(run.id),
+        "case_type": run.case_type,
+        "engine_version": run.engine_version,
+        "horizon_weeks": run.horizon_weeks,
+        "min_cash": f"{run.min_cash:.2f}",
+        "min_cash_date": run.min_cash_date.isoformat(),
+        "end_cash": f"{run.end_cash:.2f}",
+        "runway_weeks": run.runway_weeks,
+        "reserve_breach": run.reserve_breach,
+        "cash_floor_breach": run.cash_floor_breach,
+        "baseline_hash": run.baseline_hash,
+        "weekly_cash": [
+            {
+                "point_id": str(p.id),
+                "week_number": p.week_number,
+                "week_start": p.week_start.isoformat(),
+                "opening_cash": f"{p.opening_cash:.2f}",
+                "projected_inflows": f"{p.projected_inflows:.2f}",
+                "projected_outflows": f"{p.projected_outflows:.2f}",
+                "closing_cash": f"{p.closing_cash:.2f}",
+                "value_label": p.value_label,
+            }
+            for p in points
+        ],
+    }
+
+
+@router.post("/scenarios/run", response_model=ToolResultEnvelope)
+async def run_scenario(
+    request: ScenarioRunRequest,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Executes the Finance Engine Contract v1 (Section 8 / Part A5).
+
+    Deterministic, pure delta application, 3 cases (expected, best, worst).
+    """
+    envelope = await ScenarioService.run_scenario(
+        session=db,
+        org_id=auth.org_id,
+        request=request,
+    )
+
+    await create_audit_log(
+        session=db,
+        org_id=auth.org_id,
+        actor_user_id=auth.user_id,
+        action="RUN_SCENARIO",
+        entity_type="scenario",
+        entity_id=UUID(envelope.run_id) if envelope.run_id else None,
+        decision="executed",
+        metadata={
+            "scenario_name": request.scenario.name,
+            "origin": request.scenario.origin.value if hasattr(request.scenario.origin, "value") else str(request.scenario.origin),
+            "changes_count": len(request.scenario.changes),
+            "run_id": envelope.run_id,
+        },
+    )
+
+    return envelope
+
+
+@router.get("/scenarios/{scenario_id}/compare")
+async def compare_scenario(
+    scenario_id: UUID,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Compares baseline vs scenario cases side-by-side."""
+    return await ScenarioService.compare_scenarios(
+        session=db,
+        org_id=auth.org_id,
+        scenario_id=scenario_id,
+    )
+
+
+@router.get("/forecast-points/{point_id}/lineage")
+async def get_forecast_point_lineage(
+    point_id: UUID,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Returns the calculation formula, active assumptions, and contributing source rows."""
+    return await LineageResolver.get_point_lineage(
+        session=db,
+        org_id=auth.org_id,
+        point_id=point_id,
+    )
+
+
+@router.get("/metrics", response_model=ToolResultEnvelope)
+async def get_finance_metric(
+    metric: str,
+    from_date: Optional[date] = None,
+    to_date: Optional[date] = None,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve financial metric with source row references."""
+    return await RealFinanceService.get_metric(
+        session=db,
+        org_id=auth.org_id,
+        metric=metric,
+        from_date=from_date,
+        to_date=to_date,
+    )
+
+
+@router.get("/source-rows", response_model=ToolResultEnvelope)
+async def list_source_rows(
+    ref: Optional[str] = None,
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """List raw source rows for tenant with optional ref filtering."""
+    return await RealFinanceService.list_source_rows(
+        session=db,
+        org_id=auth.org_id,
+        ref=ref,
+    )
+
+
+@router.get("/snapshot", response_model=ToolResultEnvelope)
+async def get_cfo_snapshot(
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """CfoSnapshotService endpoint consumed by Moonshot intake."""
+    return await RealCfoSnapshotService.get(
+        session=db,
+        org_id=auth.org_id,
+    )
+
+
+@router.get("/settings")
+async def get_finance_settings(
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Retrieve tenant finance settings."""
+    stmt = select(FinanceSettings).where(FinanceSettings.org_id == auth.org_id)
+    settings = (await db.execute(stmt)).scalar_one_or_none()
+    if not settings:
+        raise NotFoundError("Finance settings not found")
+
+    return {
+        "org_id": str(settings.org_id),
+        "reserve_amount": f"{settings.reserve_amount:.2f}",
+        "cash_floor_weeks": settings.cash_floor_weeks,
+        "worst_case_delay_days": settings.worst_case_delay_days,
+        "worst_case_rev_pct_delta": f"{settings.worst_case_rev_pct_delta:.2f}",
+        "best_case_advance_days": settings.best_case_advance_days,
+        "best_case_rev_pct_delta": f"{settings.best_case_rev_pct_delta:.2f}",
+        "currency": settings.currency,
+    }
+
+
+@router.patch("/settings")
+async def update_finance_settings(
+    payload: Dict[str, Any],
+    auth: AuthContext = Depends(get_auth_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update tenant finance settings. Admin/Owner only."""
+    RoleChecker("admin")(auth)
+
+    stmt = select(FinanceSettings).where(FinanceSettings.org_id == auth.org_id)
+    settings = (await db.execute(stmt)).scalar_one_or_none()
+    if not settings:
+        settings = FinanceSettings(org_id=auth.org_id)
+        db.add(settings)
+
+    if "reserve_amount" in payload:
+        settings.reserve_amount = Decimal(str(payload["reserve_amount"]))
+    if "cash_floor_weeks" in payload:
+        settings.cash_floor_weeks = int(payload["cash_floor_weeks"])
+    if "worst_case_delay_days" in payload:
+        settings.worst_case_delay_days = int(payload["worst_case_delay_days"])
+    if "worst_case_rev_pct_delta" in payload:
+        settings.worst_case_rev_pct_delta = Decimal(str(payload["worst_case_rev_pct_delta"]))
+    if "best_case_advance_days" in payload:
+        settings.best_case_advance_days = int(payload["best_case_advance_days"])
+    if "best_case_rev_pct_delta" in payload:
+        settings.best_case_rev_pct_delta = Decimal(str(payload["best_case_rev_pct_delta"]))
+
+    await db.commit()
+
+    await create_audit_log(
+        session=db,
+        org_id=auth.org_id,
+        actor_user_id=auth.user_id,
+        action="UPDATE_SETTINGS",
+        entity_type="finance_settings",
+        entity_id=settings.id,
+        decision="applied",
+        metadata={"updated_keys": list(payload.keys())},
+    )
+
+    return {"status": "ok", "message": "Settings updated successfully"}
+
+
+@router.get("/zetaris/smoke-test")
+async def zetaris_smoke_test(
+    auth: AuthContext = Depends(get_auth_context),
+):
+    """Day-1 smoke test verifying the Zetaris integration path and fallback."""
+    return await ZetarisAdapter.smoke_test()
+
+
+
+
+

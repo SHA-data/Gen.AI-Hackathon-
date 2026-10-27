@@ -5,6 +5,9 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+from services.api.app.core.models import AuditLog
+
 
 class AuditLogEntry(BaseModel):
     id: UUID = Field(default_factory=uuid4)
@@ -16,6 +19,7 @@ class AuditLogEntry(BaseModel):
     decision: str  # 'allowed' | 'denied' | 'approved' | 'rejected' | 'executed'
     metadata: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
 
 class AuditLogger:
     """In-memory collector and DB helper for append-only audit entries."""
@@ -32,7 +36,6 @@ class AuditLogger:
         actor_user_id: Optional[UUID] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> AuditLogEntry:
-        # Sanitize metadata: verify no raw text or financial amounts are leaked
         clean_meta = {}
         if metadata:
             for k, v in metadata.items():
@@ -56,4 +59,31 @@ class AuditLogger:
     def get_entries(self, org_id: UUID) -> list[AuditLogEntry]:
         return [e for e in self._entries if e.org_id == org_id]
 
+
 audit_logger = AuditLogger()
+
+
+async def create_audit_log(
+    session: AsyncSession,
+    org_id: UUID,
+    action: str,
+    entity_type: str,
+    actor_user_id: Optional[UUID] = None,
+    entity_id: Optional[UUID] = None,
+    decision: Optional[str] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> AuditLog:
+    """Append-only audit log entry helper."""
+    safe_metadata = metadata or {}
+    audit_entry = AuditLog(
+        org_id=org_id,
+        actor_user_id=actor_user_id,
+        action=action,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        decision=decision,
+        extra_metadata=safe_metadata,
+    )
+    session.add(audit_entry)
+    await session.flush()
+    return audit_entry

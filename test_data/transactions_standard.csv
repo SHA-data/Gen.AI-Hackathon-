@@ -1,0 +1,9 @@
+transaction_date,amount,currency,category,client_or_vendor,is_actual
+2026-10-18,48000.00,USD,revenue,Apex Corp,true
+2026-10-22,22500.00,USD,revenue,Beacon Media,true
+2026-10-28,-76500.00,USD,payroll,Payroll Operations,true
+2026-11-01,-6500.00,USD,rent,Commercial Real Estate,true
+2026-11-05,16500.00,USD,revenue,Crestline Retail,true
+2026-11-10,-12800.00,USD,software,AWS Cloud and Subscriptions,true
+2026-11-15,34000.00,USD,revenue,Hyperion AI Labs,true
+2026-11-20,-4500.00,USD,marketing,Google Ads and Conferences,true

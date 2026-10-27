@@ -1,0 +1,5 @@
+invoice_number,client,amount,currency,issue_date,due_date,expected_payment_date,status,is_uncertain
+INV-2026-101,Apex Corp Conflict,52000.00,USD,2026-11-01,2026-12-01,2026-12-05,issued,true
+INV-ANOM-201,Nova Dynamics,18400.00,USD,2026-11-10,2026-12-10,2026-12-10,issued,false
+INV-ANOM-202,Solaria Energy,24500.00,USD,2026-11-14,2026-12-14,2026-12-14,issued,true
+INV-ANOM-203,Vanguard Logistics,9800.00,USD,2026-11-20,2026-12-20,2026-12-20,issued,false

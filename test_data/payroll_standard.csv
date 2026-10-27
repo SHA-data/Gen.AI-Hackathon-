@@ -1,0 +1,9 @@
+employee_identifier,role_title,monthly_gross,benefits_and_taxes,currency,pay_frequency,start_date
+EMP-101,VP of Engineering,14000.00,1400.00,USD,monthly,2026-10-01
+EMP-102,Staff Backend Architect,10500.00,1050.00,USD,monthly,2026-10-15
+EMP-103,Senior Fullstack Engineer,9000.00,900.00,USD,monthly,2026-11-01
+EMP-104,AI/ML Pipeline Specialist,9500.00,950.00,USD,monthly,2026-11-01
+EMP-105,Senior Product Designer,8500.00,850.00,USD,monthly,2026-11-15
+EMP-106,Technical Product Manager,9000.00,900.00,USD,monthly,2026-10-01
+EMP-107,Customer Success Director,7500.00,750.00,USD,monthly,2026-11-01
+EMP-108,DevOps / SRE Lead,8500.00,850.00,USD,monthly,2026-12-01

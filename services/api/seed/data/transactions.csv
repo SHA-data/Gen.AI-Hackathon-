@@ -1,0 +1,7 @@
+transaction_date,amount,currency,category,client_or_vendor,is_actual
+2026-09-15,45000.00,USD,revenue,Apex Corp,true
+2026-09-20,20000.00,USD,revenue,Beacon Media,true
+2026-09-28,-60000.00,USD,payroll,Payroll Distribution,true
+2026-10-01,-5000.00,USD,rent,WeWork Agency Office,true
+2026-10-10,15000.00,USD,revenue,Crestline Retail,true
+2026-10-15,-10000.00,USD,software,AWS and SaaS Tools,true

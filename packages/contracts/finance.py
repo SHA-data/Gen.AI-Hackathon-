@@ -8,7 +8,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Any, Dict, List, Literal, Optional, Protocol, Union
 from uuid import UUID, uuid4
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 from packages.contracts.envelope import ToolResultEnvelope
 
@@ -47,16 +47,24 @@ class ScenarioRunRequest(BaseModel):
 
 class WeeklyCashPoint(BaseModel):
     week_start: date
-    cash: str  # Decimal string per Part A5
+    cash: Union[str, Decimal]
+
+    @field_serializer("cash", check_fields=False)
+    def serialize_cash(self, val: Any) -> str:
+        return f"{Decimal(str(val)):.2f}"
 
 class CaseResult(BaseModel):
     weekly_cash: List[WeeklyCashPoint]
-    min_cash: str
+    min_cash: Union[str, Decimal]
     min_cash_date: date
-    end_cash: str
+    end_cash: Union[str, Decimal]
     runway_weeks: Optional[int] = None
     reserve_breach: bool = False
     cash_floor_breach: bool = False
+
+    @field_serializer("min_cash", "end_cash", check_fields=False)
+    def serialize_amounts(self, val: Any) -> str:
+        return f"{Decimal(str(val)):.2f}"
 
 class ScenarioCases(BaseModel):
     """Scenario Cases model supporting both attribute access and dict-style items()."""
@@ -96,32 +104,51 @@ class ScenarioRunResponse(BaseModel):
 
 # Backward-compatibility alias
 ScenarioRunResponseData = ScenarioRunResponse
+ScenarioRunData = ScenarioRunResponse
 
 class CfoSnapshot(BaseModel):
-    org_id: UUID
+    org_id: Optional[UUID] = None
     currency: str = "USD"
-    cash: str
-    burn: str = "25000.00"
-    revenue: str = "45000.00"
-    receivables: str = "18500.00"
-    payroll: str = "24000.00"
+    cash: Union[str, Decimal]
+    burn: Union[str, Decimal] = "25000.00"
+    revenue: Union[str, Decimal] = "45000.00"
+    receivables: Union[str, Decimal] = "18500.00"
+    payroll: Union[str, Decimal] = "24000.00"
     baseline_run_id: UUID
     as_of_date: Optional[date] = None
     runway_weeks: int = 16
     cash_floor_weeks: int = 12
 
+    @field_serializer("cash", "burn", "revenue", "receivables", "payroll", check_fields=False)
+    def serialize_amounts(self, val: Any) -> str:
+        return f"{Decimal(str(val)):.2f}"
+
+CfoSnapshotData = CfoSnapshot
+
 class MetricRequest(BaseModel):
-    metric_name: str
+    metric_name: Optional[str] = None
+    metric: Optional[str] = None
     period_start: Optional[date] = None
     period_end: Optional[date] = None
+    from_date: Optional[date] = None
+    to_date: Optional[date] = None
 
-class MetricResponseData(BaseModel):
-    metric_name: str
-    amount: str
+MetricQueryRequest = MetricRequest
+
+class MetricResultData(BaseModel):
+    metric: Optional[str] = None
+    metric_name: Optional[str] = None
+    value: Optional[Decimal] = None
+    amount: Optional[str] = None
     currency: str = "USD"
-    period_start: date
-    period_end: date
+    from_date: Optional[date] = None
+    to_date: Optional[date] = None
+    period_start: Optional[date] = None
+    period_end: Optional[date] = None
+    source_row_refs: List[UUID] = Field(default_factory=list)
     source_row_ids: List[UUID] = Field(default_factory=list)
+
+MetricResponseData = MetricResultData
 
 class SourceRowData(BaseModel):
     id: UUID

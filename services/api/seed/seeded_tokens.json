@@ -1,0 +1,60 @@
+{
+  "00000000-0000-0000-0000-000000000001": {
+    "name": "Acme Digital Agency",
+    "users": {
+      "owner": {
+        "user_id": "10000000-0000-0000-0000-000000000001",
+        "email": "alice.owner@acme.test",
+        "role": "owner",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJyb2xlIjoib3duZXIiLCJleHAiOjE3OTMyMTAwNDZ9.l-7d6BYKpzQ0e1lxLZMrcQPDwdLPYecvZOF0PvYzqog"
+      },
+      "admin": {
+        "user_id": "10000000-0000-0000-0000-000000000002",
+        "email": "bob.admin@acme.test",
+        "role": "admin",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3OTMyMTAwNDZ9.kVqP0gjEr49TV6YyNv80Hb5F9apX92F6Ms5F9MD4Kpg"
+      },
+      "member": {
+        "user_id": "10000000-0000-0000-0000-000000000003",
+        "email": "charlie.member@acme.test",
+        "role": "member",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDMiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJyb2xlIjoibWVtYmVyIiwiZXhwIjoxNzkzMjEwMDQ2fQ.dzo5KbpzRAsrguQqGDsiL1ITEiyriJyaJfJZuFNe3-4"
+      },
+      "viewer": {
+        "user_id": "10000000-0000-0000-0000-000000000004",
+        "email": "dana.viewer@acme.test",
+        "role": "viewer",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDQiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzkzMjEwMDQ2fQ.kHGfzQAgAQ7Q8fFQsw7Ose6xIn-jdOSw9vu6ArCu_zQ"
+      }
+    }
+  },
+  "00000000-0000-0000-0000-000000000002": {
+    "name": "Globex Marketing",
+    "users": {
+      "owner": {
+        "user_id": "20000000-0000-0000-0000-000000000001",
+        "email": "eve.owner@globex.test",
+        "role": "owner",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJyb2xlIjoib3duZXIiLCJleHAiOjE3OTMyMTAwNDZ9.gLlrq6xRC5BlstPSmEKu6epqkSONovGfozGPf8CWdG8"
+      },
+      "admin": {
+        "user_id": "20000000-0000-0000-0000-000000000002",
+        "email": "frank.admin@globex.test",
+        "role": "admin",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3OTMyMTAwNDZ9.8bQ5rBn5KK2iY2CoRZpmiZdnm-8hRmdXMH9nvBtxP38"
+      },
+      "member": {
+        "user_id": "20000000-0000-0000-0000-000000000003",
+        "email": "grace.member@globex.test",
+        "role": "member",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDMiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJyb2xlIjoibWVtYmVyIiwiZXhwIjoxNzkzMjEwMDQ2fQ.9_LnY4RrC77zKjRWLnV_OyQsZR4QqcxDJF7Ct3Et_8w"
+      },
+      "viewer": {
+        "user_id": "20000000-0000-0000-0000-000000000004",
+        "email": "heidi.viewer@globex.test",
+        "role": "viewer",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDQiLCJvcmdfaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJyb2xlIjoidmlld2VyIiwiZXhwIjoxNzkzMjEwMDQ2fQ.UIAFimEYxP5cnRvN6XZ-rcIkQjONH_V7kTxHXtXJ-kI"
+      }
+    }
+  }
+}

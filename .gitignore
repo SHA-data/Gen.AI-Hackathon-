@@ -45,6 +45,11 @@ next-env.d.ts
 .env.test.local
 .env.production.local
 
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
 # Operating System files
 .DS_Store
 .DS_Store?

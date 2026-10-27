@@ -8,6 +8,8 @@ from fastapi import HTTPException
 from services.api.app.chat.api.router import v1_router
 from services.api.app.moonshot.api import moonshot_router
 from services.api.app.moonshot.db import init_db
+from services.api.app.cfo.api.routes import router as finance_router
+from services.api.app.core.database import Base, engine
 from services.api.app.core.errors import AppError, app_error_handler, http_exception_handler
 
 # Ensure tools are loaded and registered
@@ -30,8 +32,10 @@ app.add_middleware(
 
 # Startup event for modular databases
 @app.on_event("startup")
-def on_startup():
+async def on_startup():
     init_db()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 # Attach request_id to request state
 @app.middleware("http")
@@ -48,6 +52,7 @@ app.add_exception_handler(HTTPException, http_exception_handler)
 # Include v1 routers
 app.include_router(v1_router)
 app.include_router(moonshot_router)
+app.include_router(finance_router)
 
 @app.get("/healthz")
 async def health_check():
