@@ -1,9 +1,14 @@
-"""LLM Provider protocol and Fake implementation (Part B0.3, B2.1)."""
+"""LLM Provider protocol and Fake implementation (Part B0.3, B2.1 & Moonshot Mode)."""
+from __future__ import annotations
+
 import json
+import os
 import re
-from typing import Any, AsyncGenerator, Dict, List, Literal, Optional, Protocol, Union
+from typing import Any, AsyncGenerator, Dict, List, Literal, Optional, Protocol, Type, TypeVar, Union
 from uuid import uuid4
 from pydantic import BaseModel, Field
+
+T = TypeVar("T", bound=BaseModel)
 
 class FunctionCall(BaseModel):
     name: str
@@ -64,27 +69,98 @@ class LLMProvider(Protocol):
     ) -> AsyncGenerator[LLMStreamChunk, None]:
         ...
 
-    async def generate_structured(
+    def generate_structured(
         self,
-        messages: List[Message],
-        schema: Dict[str, Any],
-        model: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        *args,
+        **kwargs,
+    ) -> Any:
         ...
 
-    async def rerank(
+    def rerank(
         self,
-        query: str,
-        documents: List[str],
-        top_n: int = 5,
-    ) -> List[tuple[int, float]]:
+        *args,
+        **kwargs,
+    ) -> Any:
         ...
+
+    def get_model_name(self) -> str:
+        ...
+
+
+class AwaitableList(list):
+    """List that can also be awaited in async contexts."""
+    def __await__(self):
+        async def _id():
+            return list(self)
+        return _id().__await__()
+
+
+class GeminiLLMProvider:
+    """Gemini API Provider using REST API for zero heavy dependencies."""
+
+    def __init__(self, api_key: str, model: str = "gemini-2.0-flash"):
+        self.api_key = api_key
+        self.model = model
+        self.endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+
+    def get_model_name(self) -> str:
+        return f"google/{self.model}"
+
+    def generate_structured(self, prompt: Any = None, schema: Any = None, system_prompt: Optional[str] = None, *args, **kwargs) -> Any:
+        import requests
+        prompt_str = prompt if isinstance(prompt, str) else str(prompt or kwargs.get("prompt", ""))
+        target_schema = schema or kwargs.get("schema")
+        json_schema = target_schema.model_json_schema() if hasattr(target_schema, "model_json_schema") else {}
+        headers = {"Content-Type": "application/json"}
+        payload: Dict[str, Any] = {
+            "contents": [{"parts": [{"text": prompt_str}]}],
+            "generationConfig": {
+                "response_mime_type": "application/json",
+                "temperature": 0.2,
+            },
+        }
+        if json_schema:
+            payload["generationConfig"]["response_schema"] = json_schema
+        if system_prompt:
+            payload["systemInstruction"] = {"parts": [{"text": system_prompt}]}
+
+        resp = requests.post(self.endpoint, headers=headers, json=payload, timeout=45)
+        resp.raise_for_status()
+        data = resp.json()
+        raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
+        return target_schema.model_validate_json(raw_text) if hasattr(target_schema, "model_validate_json") else json.loads(raw_text)
+
+    def rerank(self, query: str = "", candidates: Any = None, top_k: int = 5, documents: Any = None, top_n: Optional[int] = None, *args, **kwargs) -> Any:
+        import requests
+        items = candidates if candidates is not None else (documents or kwargs.get("candidates") or kwargs.get("documents"))
+        limit = top_n if top_n is not None else top_k
+        if not items:
+            return AwaitableList([])
+        titles = "\n".join(f"{i}: {c.get('title', c)}" for i, c in enumerate(items))
+        prompt = f"Goal: {query}\n\nCandidate Strategies:\n{titles}\n\nReturn the integer indices of the top {limit} most relevant strategies as a JSON array of integers, e.g. [0, 3, 1]."
+        try:
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"response_mime_type": "application/json", "temperature": 0.0},
+            }
+            resp = requests.post(self.endpoint, headers=headers, json=payload, timeout=30)
+            resp.raise_for_status()
+            indices = json.loads(resp.json()["candidates"][0]["content"]["parts"][0]["text"])
+            return AwaitableList([items[i] for i in indices if 0 <= i < len(items)][:limit])
+        except Exception:
+            return AwaitableList(items[:limit])
+
 
 class FakeLLMProvider:
     """Deterministic, runnable fake for testing without network or API keys."""
 
-    def __init__(self, default_model: str = "fake-nemotron-3"):
+    def __init__(self, default_model: str = "fake-nemotron-3", canned_responses: Optional[Dict[str, Any]] = None):
         self.default_model = default_model
+        self.canned_responses = canned_responses or {}
+
+    def get_model_name(self) -> str:
+        return self.default_model
 
     async def chat_with_tools(
         self,
@@ -145,9 +221,9 @@ class FakeLLMProvider:
             )
             return LLMResponse(tool_calls=[tool_call], finish_reason="tool_calls")
 
-        # 2. Metric detection: "spend", "revenue", "cash", "burn"
-        if any(w in content_lower for w in ["spend", "spent", "revenue", "cash", "burn"]):
-            metric = "spend" if "spend" in content_lower else "cash"
+        # 2. Metric lookup: "spend", "balance", "burn"
+        if any(w in content_lower for w in ["spend", "balance", "cost", "burn", "software"]):
+            metric = "spend" if "spend" in content_lower or "software" in content_lower else "burn"
             tool_call = ToolCall(
                 function=FunctionCall(
                     name="finance.get_metric",
@@ -219,18 +295,117 @@ class FakeLLMProvider:
                 yield LLMStreamChunk(delta_content=delta)
             yield LLMStreamChunk(finish_reason="stop")
 
-    async def generate_structured(
+    def generate_structured(
         self,
-        messages: List[Message],
-        schema: Dict[str, Any],
+        prompt: Any = None,
+        schema: Any = None,
+        system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        messages: Any = None,
+        *args,
+        **kwargs,
+    ) -> Any:
+        target_schema = schema or kwargs.get("schema")
+        raw_prompt = prompt if prompt is not None else messages or kwargs.get("prompt") or kwargs.get("messages")
+        
+        prompt_text = ""
+        if isinstance(raw_prompt, str):
+            prompt_text = raw_prompt
+        elif isinstance(raw_prompt, list):
+            prompt_text = " ".join(str(getattr(m, "content", m)) for m in raw_prompt)
+        else:
+            prompt_text = str(raw_prompt or "")
+
+        prompt_lower = prompt_text.lower()
+        schema_name = getattr(target_schema, "__name__", "").lower()
+
+        if target_schema and hasattr(target_schema, "model_validate"):
+            if "assumption" in schema_name or "decompose" in prompt_lower:
+                canned = {
+                    "assumptions": [
+                        {
+                            "text": "Enterprise clients will accept 100% upfront deposits on retainer contracts",
+                            "importance": 90.0,
+                            "is_critical": True,
+                            "category": "demand",
+                        },
+                        {
+                            "text": "Self-serve onboarding flow will convert free users without dedicated sales staff",
+                            "importance": 85.0,
+                            "is_critical": True,
+                            "category": "demand",
+                        },
+                        {
+                            "text": "Core delivery team of 4 can deliver 3 concurrent retainers without burnout",
+                            "importance": 70.0,
+                            "is_critical": False,
+                            "category": "execution",
+                        },
+                    ]
+                }
+                return target_schema.model_validate(canned)
+            if "stresstest" in schema_name or "pre-mortem" in prompt_lower or "skeptic" in prompt_lower:
+                canned = {
+                    "pre_mortem_scenarios": [
+                        {
+                            "failure_mode": "Key clients reject upfront retainer terms and delay signing",
+                            "probability": "medium",
+                            "impact": "high",
+                            "mitigation": "Offer 50% split deposit with 5% discount for 100% prepay",
+                        },
+                        {
+                            "failure_mode": "Self-serve freemium usage explodes server costs before monetization",
+                            "probability": "low",
+                            "impact": "medium",
+                            "mitigation": "Set strict free tier quotas and automated upgrade prompts",
+                        },
+                    ],
+                    "experiments": [
+                        {
+                            "title": "30-Day Retainer Pilot",
+                            "metric": "Deposit acceptance rate",
+                            "target": ">= 60% of new proposals accept upfront retainer",
+                            "duration_days": 30,
+                        }
+                    ],
+                }
+                return target_schema.model_validate(canned)
+            try:
+                return target_schema()
+            except Exception:
+                return target_schema.model_construct()
+
         return {"intent": "finance_query", "confidence": 0.95}
 
-    async def rerank(
+    def rerank(
         self,
-        query: str,
-        documents: List[str],
-        top_n: int = 5,
-    ) -> List[tuple[int, float]]:
-        return [(i, 1.0 - (i * 0.1)) for i in range(min(top_n, len(documents)))]
+        query: str = "",
+        candidates: Any = None,
+        top_k: int = 5,
+        documents: Any = None,
+        top_n: Optional[int] = None,
+        *args,
+        **kwargs,
+    ) -> Any:
+        items = candidates if candidates is not None else (documents or kwargs.get("candidates") or kwargs.get("documents"))
+        limit = top_n if top_n is not None else top_k
+        if not items:
+            return AwaitableList([])
+        first = items[0]
+        if isinstance(first, str):
+            return AwaitableList([(i, 1.0 - (i * 0.1)) for i in range(min(limit, len(items)))])
+        return AwaitableList(sorted(
+            items,
+            key=lambda c: (c.get("evidence_tier") != "A", c.get("time_to_signal_days", 999)),
+        )[:limit])
+
+
+def get_llm_provider() -> LLMProvider:
+    """Factory creating the appropriate provider based on environment variables."""
+    sample_mode = os.getenv("SAMPLE_MODE", "false").lower() == "true"
+    gemini_key = os.getenv("GEMINI_API_KEY")
+
+    if not sample_mode and gemini_key:
+        return GeminiLLMProvider(api_key=gemini_key)
+
+    return FakeLLMProvider()

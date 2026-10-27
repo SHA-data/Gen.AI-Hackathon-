@@ -12,10 +12,31 @@ class ClarificationOption(BaseModel):
     label: str
 
 class ClarificationQuestion(BaseModel):
-    question_id: str
-    prompt: str
+    id: UUID = Field(default_factory=uuid4)
+    question_id: Optional[str] = None
+    prompt: Optional[str] = None
+    field_name: Optional[str] = None
+    question: Optional[str] = None
+    tappable_options: List[str] = Field(default_factory=list)
     options: List[ClarificationOption] = Field(default_factory=list)
     allows_custom: bool = True
+    round_number: int = 1
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.field_name and not self.question_id:
+            self.question_id = self.field_name
+        elif self.question_id and not self.field_name:
+            self.field_name = self.question_id
+
+        if self.question and not self.prompt:
+            self.prompt = self.question
+        elif self.prompt and not self.question:
+            self.question = self.prompt
+
+        if self.tappable_options and not self.options:
+            self.options = [ClarificationOption(id=opt, label=opt) for opt in self.tappable_options]
+        elif self.options and not self.tappable_options:
+            self.tappable_options = [opt.label for opt in self.options]
 
 class NeedsInputResult(BaseModel):
     kind: Literal["needs_input"] = "needs_input"
@@ -194,3 +215,79 @@ class FakeMoonshotWorkflow:
             disclaimer_present=True,
             claims_count=12,
         )
+
+
+# --- Moonshot Pipeline Models (Aleena Engine) ---
+class FixedConstraints(BaseModel):
+    horizon_weeks: int = Field(default=26, ge=1, le=104)
+    budget_cap: float = Field(default=50_000.0, ge=0.0)
+    team_size: int = Field(default=4, ge=1)
+    risk_tolerance: Literal["low", "medium", "high"] = "medium"
+    cash_floor_weeks: int = Field(default=12, ge=1)
+    status: Literal["confirmed", "assumed_default"] = "confirmed"
+
+class UserHardLimit(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    description: str
+    limit_type: str
+
+class GoalAssumption(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    text: str
+    importance: float = Field(ge=0.0, le=100.0)
+    is_critical: bool = False
+    category: Literal["demand", "execution", "financial", "market"] = "demand"
+
+class CandidateStrategy(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    card_id: UUID = Field(default_factory=uuid4)
+    title: str
+    summary: str = ""
+    lever_type: str
+    time_to_signal_days: int
+    cost_to_undo: float
+    upfront_cost: float
+    evidence_tier: Literal["A", "B", "C"] = "B"
+    assumptions_addressed: List[UUID] = Field(default_factory=list)
+    parameter_template: Dict[str, Any] = Field(default_factory=dict)
+    source_quote: str = ""
+    source_quote_hash: str = ""
+    source_citation: str = ""
+    strategic_mechanism: str = ""
+
+class GateResult(BaseModel):
+    candidate_id: UUID
+    passed: bool
+    breached_gates: List[str] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
+
+class CriterionScore(BaseModel):
+    criterion: Literal["fit", "cash", "signal", "reversibility"]
+    raw_value: float
+    normalized_score: float = Field(ge=0.0, le=100.0)
+    tag: Literal["cited", "computed", "inferred", "commentary"]
+
+class StrategyRanking(BaseModel):
+    candidate_id: UUID
+    profile_name: str
+    weighted_sum: float
+    multiplier: float
+    final_score: float
+    position: int
+
+class SensitivityCheckResult(BaseModel):
+    top_candidate_id: UUID
+    is_robust: bool
+    summary: str
+    profile_top_picks: Dict[str, UUID]
+
+class MoonshotReportSummary(BaseModel):
+    report_id: UUID
+    goal_statement: str
+    constraints: FixedConstraints
+    ranked_strategies: List[Dict[str, Any]]
+    flagged_strategies: List[Dict[str, Any]]
+    sensitivity: SensitivityCheckResult
+    skeptic_section: Dict[str, Any]
+    disclaimer: str = "Decision support, not financial advice. Forecasts depend on the assumptions shown and are not guaranteed predictions."
+    disclaimer_verified: bool = True

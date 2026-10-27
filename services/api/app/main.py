@@ -2,11 +2,13 @@
 from uuid import uuid4
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-
-from services.api.app.chat.api.router import v1_router
-from services.api.app.core.errors import AppError, app_error_handler, http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi import HTTPException
+
+from services.api.app.chat.api.router import v1_router
+from services.api.app.moonshot.api import moonshot_router
+from services.api.app.moonshot.db import init_db
+from services.api.app.core.errors import AppError, app_error_handler, http_exception_handler
 
 # Ensure tools are loaded and registered
 import services.api.app.chat.tools
@@ -26,6 +28,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Startup event for modular databases
+@app.on_event("startup")
+def on_startup():
+    init_db()
+
 # Attach request_id to request state
 @app.middleware("http")
 async def attach_request_id(request: Request, call_next):
@@ -38,8 +45,9 @@ async def attach_request_id(request: Request, call_next):
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 
-# Include v1 router
+# Include v1 routers
 app.include_router(v1_router)
+app.include_router(moonshot_router)
 
 @app.get("/healthz")
 async def health_check():

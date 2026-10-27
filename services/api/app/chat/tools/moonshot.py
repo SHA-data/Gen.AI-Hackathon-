@@ -11,20 +11,36 @@ from packages.contracts.moonshot import (
     NeedsInputResult,
 )
 from services.api.app.core.auth import AuthContext
+from services.api.app.core.config import settings
 
-_moonshot_workflow: MoonshotWorkflow = FakeMoonshotWorkflow()
+
+def _resolve_default_workflow() -> MoonshotWorkflow:
+    if getattr(settings, "MOONSHOT_BACKEND", "fake") == "real":
+        try:
+            from services.api.app.moonshot.adapter import RealMoonshotWorkflowAdapter
+            return RealMoonshotWorkflowAdapter()
+        except Exception:
+            return FakeMoonshotWorkflow()
+    return FakeMoonshotWorkflow()
+
+
+_moonshot_workflow: MoonshotWorkflow = _resolve_default_workflow()
+
 
 def set_moonshot_workflow(workflow: MoonshotWorkflow):
     global _moonshot_workflow
     _moonshot_workflow = workflow
 
+
 def get_moonshot_workflow() -> MoonshotWorkflow:
     return _moonshot_workflow
+
 
 class MoonshotRunArgs(BaseModel):
     goal: str
     constraints: Optional[Dict[str, Any]] = Field(default_factory=dict)
     answers: Optional[Dict[str, str]] = None
+
 
 async def handle_moonshot_run(
     auth: AuthContext,
@@ -55,7 +71,7 @@ async def handle_moonshot_run(
         )
 
     # MoonshotReport
-    sources = [s.strategy_id for s in result.top_strategies] + [s.cfo_run_id for s in result.top_strategies]
+    sources = [str(s.strategy_id) for s in result.top_strategies] + [str(s.cfo_run_id) for s in result.top_strategies]
     return ToolResultEnvelope(
         status="ok",
         data=result.model_dump(),
