@@ -1,0 +1,212 @@
+openapi: 3.0.3
+info:
+  title: NeuralCFO Chatbot API Fragment
+  version: 1.0.0
+  description: OpenAPI 3.0 fragment for the LLM Chatbot Gateway & Chat module owned by Aroon.
+paths:
+  /v1/conversations:
+    post:
+      summary: Start a new conversation
+      operationId: createConversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agent_key:
+                  type: string
+                  enum: [neuralcfo, moonshot, router]
+                  default: router
+                title:
+                  type: string
+                  default: New Conversation
+      responses:
+        '201':
+          description: Conversation created
+  /v1/conversations/{id}:
+    get:
+      summary: Load conversation history
+      operationId: getConversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conversation details
+        '404':
+          description: Conversation not found
+  /v1/conversations/{id}/messages:
+    post:
+      summary: Send message and receive SSE stream
+      operationId: sendMessageStream
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                agent_key:
+                  type: string
+      responses:
+        '200':
+          description: Server-Sent Events stream (token, tool_start, tool_result, citation, chart, action_proposal, stage, error, done)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /v1/documents:
+    post:
+      summary: Upload file (CSV to finance import, PDF/Text to RAG)
+      operationId: uploadDocument
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Upload processed
+        '409':
+          description: Duplicate file detected
+  /v1/actions/{id}/approve:
+    post:
+      summary: Approve dashboard action proposal
+      operationId: approveAction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Action approved and applied
+        '403':
+          description: Forbidden for current role
+  /v1/actions/{id}/reject:
+    post:
+      summary: Reject dashboard action proposal
+      operationId: rejectAction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Action proposal rejected
+  /v1/citations/{id}:
+    get:
+      summary: Resolve evidence citation
+      operationId: getCitation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Source lineage record
+  /v1/memories:
+    get:
+      summary: Read user and organization memories
+      operationId: listMemories
+      responses:
+        '200':
+          description: List of memory items
+  /v1/memories/{id}:
+    patch:
+      summary: Update/correct a memory item
+      operationId: updateMemory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value:
+                  type: string
+      responses:
+        '200':
+          description: Memory updated
+    delete:
+      summary: Delete a memory item
+      operationId: deleteMemory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Memory deleted
+  /v1/feedback:
+    post:
+      summary: Submit user rating / feedback
+      operationId: submitFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message_id, score]
+              properties:
+                message_id:
+                  type: string
+                  format: uuid
+                score:
+                  type: integer
+                  enum: [-1, 1]
+                comment:
+                  type: string
+      responses:
+        '201':
+          description: Feedback recorded
