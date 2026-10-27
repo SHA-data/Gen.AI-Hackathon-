@@ -4,7 +4,7 @@ import ForecastChart, { WeeklyPoint } from './components/ForecastChart';
 import ScenarioComparison, { ComparisonCase } from './components/ScenarioComparison';
 import ScenarioLeverDock, { ScenarioChangePayload } from './components/ScenarioLeverDock';
 import UploadModal from './components/UploadModal';
-import { Database, RefreshCw, UploadCloud, ShieldCheck, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Database, RefreshCw, UploadCloud, ShieldCheck, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 
 export { EvidenceDrawer, ForecastChart, ScenarioComparison, ScenarioLeverDock, UploadModal };
 
@@ -394,9 +394,7 @@ export const CfoDashboard: React.FC = () => {
           <button
             onClick={() => setNotification(null)}
             className="clay-btn w-6 h-6 rounded-full flex items-center justify-center text-slate-700"
-          >
-            ✕
-          </button>
+          ><X className="w-4 h-4" /></button>
         </div>
       )}
 
@@ -440,7 +438,8 @@ export const CfoDashboard: React.FC = () => {
         <ForecastChart
           points={chartPoints}
           baselinePoints={chartPoints}
-          minCashDate={baselineCase.min_cash ? `Min: $${baselineCase.min_cash}` : '1 Feb 2027'}
+          minCashValue={baselineCase.min_cash ? `$${parseFloat(baselineCase.min_cash).toLocaleString('en-US', { minimumFractionDigits: 0 })}` : '$114k'}
+          minCashDate="1 Feb 2027"
           onSelectPoint={(ptId) => {
             if (ptId) {
               setSelectedPointId(ptId);

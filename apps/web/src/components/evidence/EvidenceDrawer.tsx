@@ -59,7 +59,7 @@ export function EvidenceDrawerProvider({ children }: { children: React.ReactNode
                   onClick={closeDrawer}
                   className="text-slate-400 hover:text-slate-100 text-sm font-mono px-2 py-1 bg-slate-800 rounded"
                 >
-                  ✕ ESC
+                  ESC
                 </button>
               </div>
 

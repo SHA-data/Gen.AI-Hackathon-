@@ -1,3 +1,4 @@
+import { X, CheckCircle2, AlertTriangle } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 
 export interface UploadModalProps {
@@ -188,9 +189,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             aria-label="Close modal"
             className="p-1 rounded-[var(--radius-control)] hover:opacity-80 transition"
             style={{ color: 'var(--muted)' }}
-          >
-            ✕
-          </button>
+          ><X className="w-4 h-4" /></button>
         </div>
 
         <div className="p-6 space-y-4">
@@ -203,7 +202,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 color: 'var(--status-failed)',
               }}
             >
-              <span>✕</span>
+              <span><X className="w-4 h-4" /></span>
               <span>{error}</span>
             </div>
           )}
@@ -264,7 +263,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                     color: flaggedCount > 0 ? 'var(--status-warning)' : 'var(--status-verified)',
                   }}
                 >
-                  {flaggedCount > 0 ? `⚠ ${flaggedCount} Anomalies Flagged` : '✓ Clean Ingestion (100% Accepted)'}
+                  {flaggedCount > 0 ? ` ${flaggedCount} Anomalies Flagged` : ' Clean Ingestion (100% Accepted)'}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2.5 font-[var(--font-mono)] tabular-nums text-xs">
@@ -285,7 +284,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                   color: 'var(--status-verified)',
                 }}
               >
-                <span>✓</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Records stored in canonical ledger. Click below to recalculate the 26-week forecast.</span>
               </div>
             </div>
