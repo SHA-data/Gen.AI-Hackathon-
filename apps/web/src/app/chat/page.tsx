@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useEvidenceDrawer } from "@/components/evidence/EvidenceDrawer";
 import { ApprovalCard, ActionProposalData } from "@/components/chat/ApprovalCard";
 import { ChartWidget, ChartEventData } from "@/components/chat/ChartWidget";
+import { Users, Compass, BarChart2, BookmarkCheck, ExternalLink } from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -188,7 +189,7 @@ export default function ChatPage() {
                   "1. **Performance-Based Retainer Shift**: Convert key clients to 50% upfront deposits (Fit: 88.5, Reversibility: High). " +
                   "Projected cash floor improves by +$35,000.00.\n\n" +
                   "2. **Productized Discovery Sprint**: Pre-sell 2-week architectural sprints paid 100% upfront (Fit: 82.0).\n\n" +
-                  "⚠️ *Disclaimer: NeuralCFO provides decision support and strategic stress-testing, not formal financial or legal advice.*",
+                  "[DISCLAIMER] NeuralCFO provides decision support and strategic stress-testing, not formal financial or legal advice.",
                 status: "verified",
                 citations: [
                   {
@@ -255,27 +256,31 @@ export default function ChatPage() {
         <span className="text-slate-500 font-mono">Demo Quick-Actions:</span>
         <button
           onClick={() => handleSend("Can we hire two developers if our biggest client pays 30 days late?")}
-          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-700 whitespace-nowrap transition-colors"
+          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-700 whitespace-nowrap transition-colors flex items-center space-x-1.5"
         >
-          💼 1. Hire 2 Devs + 30d Delay
+          <Users className="w-3.5 h-3.5" />
+          <span>[1] Hire 2 Devs + 30d Delay</span>
         </button>
         <button
           onClick={() => handleSend("What bold move could fix this instead?")}
-          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-purple-400 border border-slate-700 whitespace-nowrap transition-colors"
+          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-purple-400 border border-slate-700 whitespace-nowrap transition-colors flex items-center space-x-1.5"
         >
-          🚀 2. Bold Move (Moonshot Mode)
+          <Compass className="w-3.5 h-3.5" />
+          <span>[2] Bold Move (Moonshot Mode)</span>
         </button>
         <button
           onClick={() => handleSend("Add the runway chart to my dashboard")}
-          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-blue-400 border border-slate-700 whitespace-nowrap transition-colors"
+          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-blue-400 border border-slate-700 whitespace-nowrap transition-colors flex items-center space-x-1.5"
         >
-          📊 3. Propose Dashboard Chart
+          <BarChart2 className="w-3.5 h-3.5" />
+          <span>[3] Propose Dashboard Chart</span>
         </button>
         <button
           onClick={() => handleSend("Remember that payroll is on the 28th")}
-          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 whitespace-nowrap transition-colors"
+          className="px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-700 whitespace-nowrap transition-colors flex items-center space-x-1.5"
         >
-          🧠 4. Save Assumption Memory
+          <BookmarkCheck className="w-3.5 h-3.5" />
+          <span>[4] Save Assumption Memory</span>
         </button>
       </div>
 
@@ -337,8 +342,8 @@ export default function ChatPage() {
               {/* Tappable Clarification Options for Moonshot */}
               {m.needsInput && (
                 <div className="my-3 p-3 bg-purple-950/40 border border-purple-800 rounded">
-                  <div className="text-xs font-semibold text-purple-300 mb-2">
-                    🎯 Moonshot Mode: Required Constraints
+                  <div className="text-xs font-semibold text-purple-300 mb-2 font-mono uppercase">
+                    [CONSTRAINTS REQUIRED] Moonshot Mode Intake
                   </div>
                   {m.needsInput.questions.map((q) => (
                     <div key={q.question_id} className="mb-2">
@@ -348,7 +353,7 @@ export default function ChatPage() {
                           <button
                             key={opt.id}
                             onClick={() => handleSend(opt.label)}
-                            className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-purple-900 text-slate-200 rounded border border-slate-700 transition-colors"
+                            className="px-2.5 py-1 text-xs bg-slate-800 hover:bg-purple-900 text-slate-200 rounded border border-slate-700 transition-colors font-mono"
                           >
                             {opt.label}
                           </button>
@@ -377,7 +382,7 @@ export default function ChatPage() {
                       }
                       className="text-xs font-mono px-2 py-0.5 rounded bg-slate-950 hover:bg-slate-800 text-emerald-300 border border-emerald-900 transition-colors flex items-center space-x-1"
                     >
-                      <span>🔗</span>
+                      <ExternalLink className="w-3 h-3 text-emerald-400" />
                       <span>{c.label}</span>
                     </button>
                   ))}
@@ -409,7 +414,7 @@ export default function ChatPage() {
           <button
             type="submit"
             disabled={isStreaming || !input.trim()}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg shadow transition-colors"
+            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg shadow transition-colors font-mono uppercase"
           >
             {isStreaming ? "Thinking..." : "Send"}
           </button>

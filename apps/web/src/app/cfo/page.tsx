@@ -1,10 +1,13 @@
 import React from "react";
+import { BarChart3 } from "lucide-react";
 
 export default function CfoPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-xl mt-6">
       <div className="flex items-center space-x-3 mb-4">
-        <span className="text-2xl">📊</span>
+        <div className="p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-400">
+          <BarChart3 className="w-5 h-5" />
+        </div>
         <div>
           <h1 className="text-xl font-bold text-slate-100">NeuralCFO Mode: Finance Engine Workspace</h1>
           <p className="text-xs text-slate-400 font-mono">Module Owner: Sharjeel (/services/api/app/cfo)</p>

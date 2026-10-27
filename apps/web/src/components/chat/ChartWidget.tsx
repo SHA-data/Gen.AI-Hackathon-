@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { BarChart2 } from "lucide-react";
 
 export interface ChartEventData {
   chart_type: "line" | "bar" | "waterfall";
@@ -20,8 +21,9 @@ export function ChartWidget({ chart }: { chart: ChartEventData }) {
   return (
     <div className="my-3 p-4 bg-slate-900/90 border border-slate-800 rounded-lg max-w-xl">
       <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-800">
-        <h4 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider font-mono">
-          📈 {chart.title}
+        <h4 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider font-mono flex items-center space-x-1.5">
+          <BarChart2 className="w-3.5 h-3.5 text-emerald-400" />
+          <span>{chart.title}</span>
         </h4>
         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
           Canonical Weekly Series
